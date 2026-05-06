@@ -320,8 +320,9 @@ def run_part1(config: Part1Config) -> None:
         fig, ax = plt.subplots(figsize=(10, 5))
         ax.plot(cum.index, cum["R_mv"], label="Minimum Variance (oos)")
         ax.plot(cum.index, cum["R_vw"], label="Value Weighted")
-        ax.set_title("Part I - Cumulative Returns (2014-2025)")
-        ax.set_ylabel("Growth of $1")
+        ax.set_title("Cumulative Performance VW vs. Minimum-Variance Portfolio "
+            "(Europe, Scope 1 & 2, 2014-2025)")
+        ax.set_ylabel("Cumulative Return (Growth of 1$)")
         ax.legend()
         ax.grid(True, alpha=0.3)
         fig.tight_layout()
