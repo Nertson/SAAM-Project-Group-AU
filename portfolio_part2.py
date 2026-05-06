@@ -29,6 +29,7 @@ class Part2Config:
     min_monthly_obs: int = 36
     stale_zero_return_threshold: float = 0.5
     cf_reduction_ratio: float = 0.5  # Section 3.2 target
+    nz_theta: float = 0.10  # Section 4.1: 10% yearly reduction
 
 
 def _min_var_with_optional_cf_constraint(
@@ -189,9 +190,11 @@ def run_part2(config: Part2Config) -> None:
     monthly_mv_cf_all: List[pd.Series] = []
     monthly_vw_all: List[pd.Series] = []
     monthly_vw_cf_all: List[pd.Series] = []
+    monthly_vw_nz_all: List[pd.Series] = []
     alloc_rows = []
     waci_cf_rows = []
     top_emitters_rows = []
+    cf_vw_baseline_y0: float | None = None
 
     for y in range(config.start_rebal_year, config.end_rebal_year + 1):
         investable = _build_investment_set(
@@ -250,6 +253,9 @@ def run_part2(config: Part2Config) -> None:
             waci_vw = np.nan
             w_vw = pd.Series(np.repeat(1.0 / len(investable), len(investable)), index=investable)
 
+        if y == config.start_rebal_year and np.isfinite(cf_vw):
+            cf_vw_baseline_y0 = float(cf_vw)
+
         # Section 3.3: TE minimization around VW with CF <= 50% of VW CF.
         cf_limit_vw50 = config.cf_reduction_ratio * cf_vw if np.isfinite(cf_vw) else np.nan
         if np.isfinite(cf_limit_vw50):
@@ -263,6 +269,24 @@ def run_part2(config: Part2Config) -> None:
             w_vw_cf = w_vw.to_numpy(dtype=float)
         cf_vw_cf = float(w_vw_cf @ cf_coeff)
         waci_vw_cf = float(w_vw_cf @ ci_vec)
+
+        # Section 4.1: net-zero path with 10% yearly reduction from baseline CF at Y0=2013.
+        if cf_vw_baseline_y0 is not None:
+            years_since_y0 = y - config.start_rebal_year + 1
+            cf_limit_nz = ((1.0 - config.nz_theta) ** years_since_y0) * cf_vw_baseline_y0
+            w_vw_nz = _te_min_with_cf_constraint(
+                cov=cov,
+                w_bench=w_vw.to_numpy(dtype=float),
+                cf_coeff=cf_coeff,
+                cf_limit=cf_limit_nz,
+            )
+            cf_vw_nz = float(w_vw_nz @ cf_coeff)
+            waci_vw_nz = float(w_vw_nz @ ci_vec)
+        else:
+            cf_limit_nz = np.nan
+            w_vw_nz = w_vw.to_numpy(dtype=float)
+            cf_vw_nz = float(w_vw_nz @ cf_coeff)
+            waci_vw_nz = float(w_vw_nz @ ci_vec)
 
         rp_mv, rp_vw = _compute_year_monthly_returns(
             returns_m=returns_m,
@@ -285,11 +309,19 @@ def run_part2(config: Part2Config) -> None:
             isins=investable,
             w_mv_start=w_vw_cf,
         )
+        rp_vw_nz, _ = _compute_year_monthly_returns(
+            returns_m=returns_m,
+            mv_m=mv_m,
+            year=y,
+            isins=investable,
+            w_mv_start=w_vw_nz,
+        )
 
         monthly_mv_all.append(rp_mv)
         monthly_vw_all.append(rp_vw)
         monthly_mv_cf_all.append(rp_mv_cf)
         monthly_vw_cf_all.append(rp_vw_cf)
+        monthly_vw_nz_all.append(rp_vw_nz)
 
         alloc_rows.append(
             {
@@ -298,8 +330,10 @@ def run_part2(config: Part2Config) -> None:
                 "largest_weight_mv": float(np.max(w_mv)),
                 "largest_weight_mv_cf50": float(np.max(w_mv_cf)),
                 "largest_weight_vw_cf50": float(np.max(w_vw_cf)),
+                "largest_weight_vw_nz": float(np.max(w_vw_nz)),
                 "cf_limit_mv_cf50": float(cf_limit),
                 "cf_limit_vw_cf50": float(cf_limit_vw50) if np.isfinite(cf_limit_vw50) else np.nan,
+                "cf_limit_vw_nz": float(cf_limit_nz) if np.isfinite(cf_limit_nz) else np.nan,
             }
         )
         waci_cf_rows.append(
@@ -313,6 +347,8 @@ def run_part2(config: Part2Config) -> None:
                 "CF_mv_cf50": cf_mv_cf,
                 "WACI_vw_cf50": waci_vw_cf,
                 "CF_vw_cf50": cf_vw_cf,
+                "WACI_vw_nz": waci_vw_nz,
+                "CF_vw_nz": cf_vw_nz,
             }
         )
 
@@ -333,7 +369,10 @@ def run_part2(config: Part2Config) -> None:
     r_vw = pd.concat(monthly_vw_all).sort_index()
     r_mv_cf = pd.concat(monthly_mv_cf_all).sort_index()
     r_vw_cf = pd.concat(monthly_vw_cf_all).sort_index()
-    monthly_returns = pd.DataFrame({"R_mv": r_mv, "R_vw": r_vw, "R_mv_cf50": r_mv_cf, "R_vw_cf50": r_vw_cf})
+    r_vw_nz = pd.concat(monthly_vw_nz_all).sort_index()
+    monthly_returns = pd.DataFrame(
+        {"R_mv": r_mv, "R_vw": r_vw, "R_mv_cf50": r_mv_cf, "R_vw_cf50": r_vw_cf, "R_vw_nz": r_vw_nz}
+    )
     monthly_returns.index.name = "date"
     monthly_returns.to_csv(config.output_dir / "part2_monthly_returns_2014_2025.csv")
 
@@ -343,6 +382,7 @@ def run_part2(config: Part2Config) -> None:
             {"portfolio": "P_oos_vw", **_annualized_stats(r_vw)},
             {"portfolio": "P_oos_mv_cf50", **_annualized_stats(r_mv_cf)},
             {"portfolio": "P_oos_vw_cf50", **_annualized_stats(r_vw_cf)},
+            {"portfolio": "P_oos_vw_nz", **_annualized_stats(r_vw_nz)},
         ]
     )
     stats.to_csv(config.output_dir / "part2_summary_stats.csv", index=False)
@@ -359,6 +399,7 @@ def run_part2(config: Part2Config) -> None:
         ax.plot(cum.index, cum["R_mv"], label="MV")
         ax.plot(cum.index, cum["R_mv_cf50"], label="MV with CF <= 50% MV")
         ax.plot(cum.index, cum["R_vw_cf50"], label="VW tracking-error with CF <= 50% VW")
+        ax.plot(cum.index, cum["R_vw_nz"], label="VW net-zero")
         ax.set_title("Part II - Cumulative Returns (2014-2025)")
         ax.set_ylabel("Growth of $1")
         ax.grid(True, alpha=0.3)
@@ -372,6 +413,7 @@ def run_part2(config: Part2Config) -> None:
         ax2.plot(waci_cf_df["year"], waci_cf_df["CF_vw"], label="CF VW")
         ax2.plot(waci_cf_df["year"], waci_cf_df["CF_mv"], label="CF MV")
         ax2.plot(waci_cf_df["year"], waci_cf_df["CF_mv_cf50"], label="CF MV CF50")
+        ax2.plot(waci_cf_df["year"], waci_cf_df["CF_vw_nz"], label="CF VW NZ")
         ax2.set_title("Part II - Carbon Footprint by Year")
         ax2.set_xlabel("Rebalancing year (Y)")
         ax2.grid(True, alpha=0.3)
@@ -402,10 +444,22 @@ def run_part2(config: Part2Config) -> None:
         fig4.tight_layout()
         fig4.savefig(config.output_dir / "part2_compare_vw_vs_vw_cf50.png", dpi=150)
         plt.close(fig4)
+
+        fig5, ax5 = plt.subplots(figsize=(11, 5))
+        ax5.plot(cum.index, cum["R_vw"], label="P_oos_vw")
+        ax5.plot(cum.index, cum["R_vw_cf50"], label="P_oos_vw(0.5)")
+        ax5.plot(cum.index, cum["R_vw_nz"], label="P_oos_vw(NZ)")
+        ax5.set_title("Part II (4.2) - VW, VW(0.5), VW(NZ)")
+        ax5.set_ylabel("Growth of $1")
+        ax5.grid(True, alpha=0.3)
+        ax5.legend()
+        fig5.tight_layout()
+        fig5.savefig(config.output_dir / "part2_compare_vw_vw_cf50_vw_nz.png", dpi=150)
+        plt.close(fig5)
     except Exception as exc:
         print(f"Plot skipped due to environment error: {exc}")
 
-    print("Part II (3.1 + 3.4) done. Files saved in:", config.output_dir)
+    print("Part II (3.1 + 4.2) done. Files saved in:", config.output_dir)
 
 
 if __name__ == "__main__":
