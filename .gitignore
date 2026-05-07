@@ -6,6 +6,9 @@ __pycache__/
 *.pyc
 .pycache/
 .mplcache/
+.ipython/
+.jupyter/
+.home/
 
 # Excel temp/lock files
 ~$*.xlsx
