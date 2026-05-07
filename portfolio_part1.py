@@ -220,16 +220,33 @@ def _compute_year_monthly_returns(
 
 
 def _annualized_stats(monthly_returns: pd.Series) -> Dict[str, float]:
+    """
+    Project Section 2.2 asks for the annualized average return mu_bar_p,
+    which is the arithmetic annualized return = mean(R) * 12.
+    We also report the geometric (compound) annualized return for completeness.
+    """
     r = monthly_returns.dropna()
     if r.empty:
-        return {"ann_return": np.nan, "ann_vol": np.nan, "sharpe": np.nan, "min": np.nan, "max": np.nan}
-    ann_return = (1.0 + r).prod() ** (12.0 / len(r)) - 1.0
-    ann_vol = r.std(ddof=0) * np.sqrt(12.0)
-    sharpe = ann_return / ann_vol if ann_vol > 0 else np.nan
+        return {
+            "ann_return_arith": np.nan,
+            "ann_return_geom": np.nan,
+            "ann_vol": np.nan,
+            "sharpe_arith": np.nan,
+            "sharpe_geom": np.nan,
+            "min": np.nan,
+            "max": np.nan,
+        }
+    ann_return_arith = float(r.mean() * 12.0)
+    ann_return_geom = float((1.0 + r).prod() ** (12.0 / len(r)) - 1.0)
+    ann_vol = float(r.std(ddof=0) * np.sqrt(12.0))
+    sharpe_arith = ann_return_arith / ann_vol if ann_vol > 0 else np.nan
+    sharpe_geom = ann_return_geom / ann_vol if ann_vol > 0 else np.nan
     return {
-        "ann_return": float(ann_return),
-        "ann_vol": float(ann_vol),
-        "sharpe": float(sharpe),
+        "ann_return_arith": ann_return_arith,
+        "ann_return_geom": ann_return_geom,
+        "ann_vol": ann_vol,
+        "sharpe_arith": float(sharpe_arith) if np.isfinite(sharpe_arith) else np.nan,
+        "sharpe_geom": float(sharpe_geom) if np.isfinite(sharpe_geom) else np.nan,
         "min": float(r.min()),
         "max": float(r.max()),
     }

@@ -137,16 +137,32 @@ def _te_min_with_cf_constraint(
 
 
 def _annualized_stats(monthly_returns: pd.Series) -> Dict[str, float]:
+    """
+    Reports both the arithmetic annualized return mu_bar_p = mean(R)*12 (PDF, Section 2.2)
+    and the geometric (compound) annualized return for completeness.
+    """
     r = monthly_returns.dropna()
     if r.empty:
-        return {"ann_return": np.nan, "ann_vol": np.nan, "sharpe": np.nan, "min": np.nan, "max": np.nan}
-    ann_return = (1.0 + r).prod() ** (12.0 / len(r)) - 1.0
-    ann_vol = r.std(ddof=0) * np.sqrt(12.0)
-    sharpe = ann_return / ann_vol if ann_vol > 0 else np.nan
+        return {
+            "ann_return_arith": np.nan,
+            "ann_return_geom": np.nan,
+            "ann_vol": np.nan,
+            "sharpe_arith": np.nan,
+            "sharpe_geom": np.nan,
+            "min": np.nan,
+            "max": np.nan,
+        }
+    ann_return_arith = float(r.mean() * 12.0)
+    ann_return_geom = float((1.0 + r).prod() ** (12.0 / len(r)) - 1.0)
+    ann_vol = float(r.std(ddof=0) * np.sqrt(12.0))
+    sharpe_arith = ann_return_arith / ann_vol if ann_vol > 0 else np.nan
+    sharpe_geom = ann_return_geom / ann_vol if ann_vol > 0 else np.nan
     return {
-        "ann_return": float(ann_return),
-        "ann_vol": float(ann_vol),
-        "sharpe": float(sharpe),
+        "ann_return_arith": ann_return_arith,
+        "ann_return_geom": ann_return_geom,
+        "ann_vol": ann_vol,
+        "sharpe_arith": float(sharpe_arith) if np.isfinite(sharpe_arith) else np.nan,
+        "sharpe_geom": float(sharpe_geom) if np.isfinite(sharpe_geom) else np.nan,
         "min": float(r.min()),
         "max": float(r.max()),
     }
@@ -242,16 +258,18 @@ def run_part2(config: Part2Config) -> None:
         cf_mv_cf = float(w_mv_cf @ cf_coeff)
         waci_mv_cf = float(w_mv_cf @ ci_vec)
 
-        caps_dec = mv_m.loc[investable, dec_y]
-        valid_caps_dec = caps_dec.notna()
-        if valid_caps_dec.any() and float(caps_dec[valid_caps_dec].sum()) > 0:
-            w_vw = (caps_dec[valid_caps_dec] / float(caps_dec[valid_caps_dec].sum())).reindex(investable).fillna(0.0)
-            cf_vw = float(w_vw.to_numpy() @ cf_coeff)
-            waci_vw = float(w_vw.to_numpy() @ ci_vec)
+        # PDF Section 3.3: VW benchmark uses annual market cap Cap_{i,Y},
+        # and CF(P^vw)_Y = (sum E_i,Y) / (sum Cap_i,Y).
+        cap_total_y = float(np.nansum(cap_vec))
+        if cap_total_y > 0:
+            w_vw_arr = np.where(np.isfinite(cap_vec) & (cap_vec > 0), cap_vec / cap_total_y, 0.0)
+            w_vw = pd.Series(w_vw_arr, index=investable)
+            cf_vw = float(np.nansum(emissions_vec)) / cap_total_y
+            waci_vw = float(np.nansum(w_vw_arr * ci_vec))
         else:
+            w_vw = pd.Series(np.repeat(1.0 / len(investable), len(investable)), index=investable)
             cf_vw = np.nan
             waci_vw = np.nan
-            w_vw = pd.Series(np.repeat(1.0 / len(investable), len(investable)), index=investable)
 
         if y == config.start_rebal_year and np.isfinite(cf_vw):
             cf_vw_baseline_y0 = float(cf_vw)
@@ -363,6 +381,28 @@ def run_part2(config: Part2Config) -> None:
                     "NAME": static_raw.loc[isin, "NAME"] if "NAME" in static_raw.columns else np.nan,
                     "contribution_waci_mv": float(val),
                 }
+            )
+
+        # PDF Section 3.1: top-10 firms driving the WACI of the value-weighted portfolio.
+        if y == config.start_rebal_year:
+            vw_contrib = pd.Series(w_vw.values * ci_vec, index=investable)
+            vw_weight = pd.Series(w_vw.values, index=investable)
+            vw_ci = pd.Series(ci_vec, index=investable)
+            vw_top10 = vw_contrib.sort_values(ascending=False).head(10)
+            vw_top10_rows = []
+            for rank, (isin, val) in enumerate(vw_top10.items(), start=1):
+                vw_top10_rows.append(
+                    {
+                        "rank": rank,
+                        "ISIN": isin,
+                        "NAME": static_raw.loc[isin, "NAME"] if "NAME" in static_raw.columns else np.nan,
+                        "weight_vw_pct": float(vw_weight[isin] * 100.0),
+                        "carbon_intensity": float(vw_ci[isin]),
+                        "contribution_waci_vw": float(val),
+                    }
+                )
+            pd.DataFrame(vw_top10_rows).to_csv(
+                config.output_dir / f"part2_top10_waci_contributors_vw_{y}.csv", index=False
             )
 
     r_mv = pd.concat(monthly_mv_all).sort_index()
