@@ -1,0 +1,15 @@
+# OS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.pycache/
+
+# Excel temp/lock files
+~$*.xlsx
+~$*.xls
+
+# Editor
+.vscode/
+.idea/
