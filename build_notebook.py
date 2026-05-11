@@ -61,15 +61,39 @@ from typing import Iterable, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
-# Silence harmless SLSQP probing warnings on near-singular Sigma; covariance
-# is already regularized below.
 warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*matmul.*")
 warnings.filterwarnings("ignore", category=UserWarning, message=".*non-interactive.*")
 warnings.filterwarnings("ignore", category=FutureWarning)
 np.seterr(divide="ignore", over="ignore", invalid="ignore")
+
+mpl.rcParams.update({
+    "figure.dpi": 100,
+    "savefig.dpi": 150,
+    "font.family": "DejaVu Sans",
+    "font.size": 10.5,
+    "axes.titlesize": 12,
+    "axes.titleweight": "bold",
+    "axes.labelsize": 11,
+    "axes.spines.top": False,
+    "axes.spines.right": False,
+    "axes.linewidth": 0.8,
+    "axes.edgecolor": "#444444",
+    "axes.grid": True,
+    "grid.linestyle": "-",
+    "grid.linewidth": 0.5,
+    "grid.color": "#cccccc",
+    "grid.alpha": 0.6,
+    "legend.frameon": False,
+    "legend.fontsize": 9.5,
+    "xtick.labelsize": 9.5,
+    "ytick.labelsize": 9.5,
+    "lines.linewidth": 1.7,
+    "axes.titlepad": 10,
+})
 
 DATA_DIR = Path("data_raw")
 OUTPUT_PART1 = Path("outputs_part1")

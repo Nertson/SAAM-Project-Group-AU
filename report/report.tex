@@ -42,23 +42,25 @@
 \begin{abstract}
 \noindent
 We build five long-only annually rebalanced equity portfolios over the
-European investment universe (633 firms in the cleaned static panel) between
-January 2014 and December 2025. The benchmark $P^{vw}$ delivers a geometric
-annualised return of 7.16\% (\textsc{vol} 15.8\%) while the unconstrained
-minimum-variance portfolio $P^{mv}$ realises 3.78\% (\textsc{vol} 13.8\%). We
-then impose a 50\% carbon-footprint cap on both anchors, and finally a
-Paris-aligned 10\%-per-year decarbonisation trajectory. The mathematics is
-the same in all four constrained variants: long-only quadratic programs over
-the simplex, augmented with one linear inequality on the carbon-footprint
-coefficient. Empirically, we find that decarbonising the value-weighted
-benchmark by 50\% costs only $\sim$38\,bp of geometric return (6.78\% vs.\
-7.16\%), and pursuing a full Net-Zero glide path costs $\sim$32\,bp (6.84\%).
-The relative cheapness of carbon constraints in our sample reflects (i) the
-right-skewed carbon distribution of European equities --- ten firms drive
-65\% of the value-weighted carbon footprint in 2013 --- and (ii) the
-secular decarbonisation of the index itself, with $CF(P^{vw})$ falling from
-214 to 90 \si{tCO_2/M\$} between 2013 and 2024 without any portfolio
-intervention.
+European universe (633 firms in the cleaned static panel) between
+January 2014 and December 2025. The value-weighted benchmark $P^{vw}$
+realises a geometric annualised return of 7.16\% (volatility 15.8\%),
+while the long-only minimum-variance portfolio $P^{mv}$ realises 3.78\%
+(volatility 13.8\%). We then impose a 50\% carbon-footprint cap on
+each anchor and, separately, a 10\%-per-year decarbonisation glide path
+aligned with the EU Climate Transition Benchmark. All four constrained
+problems share the same structure: a long-only quadratic programme over
+the simplex with one linear inequality on the portfolio's carbon
+footprint coefficient. In our sample, decarbonising the value-weighted
+benchmark by 50\% reduces geometric return by $\sim$38\,bp pa (6.78\%
+vs.\ 7.16\%) and a Net-Zero glide path by $\sim$32\,bp pa (6.84\%).
+Two facts are consistent with this small observed cost: ten firms
+contribute 44\% of the benchmark's WACI in 2013, and the
+value-weighted carbon footprint of the European universe declined by
+58\% over the sample without portfolio intervention. We treat these
+as descriptive features of the European 2014--2025 sample rather than
+general results, and we discuss in Section~\ref{sec:limits} why the
+findings may not extrapolate to other geographies or sample windows.
 \end{abstract}
 
 \tableofcontents
@@ -117,8 +119,7 @@ the static panel to firms classified \textsc{eur} (European), obtaining
 \end{itemize}
 
 \subsection{Cleaning rules}\label{sec:cleaning}
-Cleaning is implemented in \texttt{data\_cleaning.py} and applied identically
-in Parts~I and II:
+The cleaning rules below apply identically in Parts~I and II:
 
 \begin{enumerate}[leftmargin=*]
   \item \textbf{Price floor.} Monthly \textsc{ri} values below \$0.50 are
@@ -200,17 +201,22 @@ $n$ & 469 & 487 & 505 & 512 & 525 & 546 & 572 & 591 & 600 & 590 & 575 & 563 \\
 
 \paragraph{Minimum variance ($P^{mv}$).} At each $Y$ we estimate the
 covariance matrix $\widehat\Sigma_Y$ on the trailing 120 monthly returns up
-to and including December $Y$, using pairwise deletion (\texttt{pandas.cov}
-with \texttt{ddof=0}). The Part~I weights solve
+to and including December $Y$, using pairwise deletion of missing
+observations and no degrees-of-freedom correction. The Part~I weights
+solve
 \begin{equation}\label{eq:mv}
   w^{mv}_Y \;=\; \arg\min_{w \in \mathbb{R}^n}\; w'\,\widehat\Sigma_Y\,w
   \qquad \text{s.t.}\qquad \mathbf{1}'w = 1,\; w \ge 0.
 \end{equation}
-Equation~\eqref{eq:mv} is a strictly convex QP on the simplex; we solve it
-with \texttt{scipy.optimize.minimize} (SLSQP) after ridge-regularising
-$\widehat\Sigma$ by $10^{-10}\cdot \text{tr}(\widehat\Sigma)/n$ and rescaling by
-$\max|\widehat\Sigma_{ij}|$ for numerical conditioning. The rescaling does
-not affect the argmin.
+Equation~\eqref{eq:mv} is a strictly convex QP on the simplex; we solve
+it numerically with sequential least-squares quadratic programming
+(SLSQP) after ridge-regularising $\widehat\Sigma$ by
+$10^{-10}\cdot \text{tr}(\widehat\Sigma)/n$ and rescaling by
+$\max|\widehat\Sigma_{ij}|$ for numerical conditioning. Both adjustments
+leave the argmin unchanged; we verify in
+Section~\ref{sec:robustness} that the constrained results are also
+unchanged when the sample covariance is replaced by a Ledoit--Wolf
+shrinkage estimator.
 
 \paragraph{Value weighted ($P^{vw}$).} Using the December-$Y$ market caps:
 \begin{equation}\label{eq:vw}
@@ -289,7 +295,7 @@ constraints concentrate the portfolio on defensive sectors (utilities,
 consumer staples) that systematically lag growth and technology during
 risk-on periods. The minimum-variance allocation is also markedly more
 concentrated --- the largest weight ranges from 10\% (2018) to 22\% (2014)
-across rebalance years (Appendix table \texttt{part1\_allocation\_diagnostics.csv}).
+across rebalance years (see Appendix~\ref{app:alloc}).
 
 % =======================================================================
 \section{Part II --- Carbon-Constrained Portfolios}\label{sec:partII}
@@ -312,7 +318,10 @@ ratio (Section 3.3 of the project specification):
 \[
   CF(P^{vw})_Y = \frac{\sum_{i\in U_Y} E_{i,Y}}{\sum_{i\in U_Y} \text{MV}_{i,Y}}.
 \]
-We compute it that way in the code (\texttt{portfolio\_part2.py}).
+We use this population-ratio expression throughout, which matches the
+project specification verbatim and ensures $CF(P^{vw})_Y$ does not
+depend on the firm-by-firm value-weight calculation when individual
+market-cap observations are missing.
 
 \subsection{Top carbon contributors of $P^{vw}$ (2013)}\label{sec:top10}
 
@@ -414,11 +423,16 @@ The carbon-constrained minimum-variance portfolio solves
   \mathbf{1}'w=1,\; w\ge 0,\;
   \sum_i w_i \,\frac{E_{i,Y}}{\text{MV}_{i,Y}} \le 0.5\,CF(P^{mv})_Y.
 \end{equation}
-The cap is computed \emph{after} the unconstrained optimisation in the
-same year, so by construction the constraint is binding in every year.
-Because $CF(P^{mv})$ is already a fraction of $CF(P^{vw})$, halving it
-further imposes very tight limits (13.6 in 2013, decaying to 32 in 2024;
-see \texttt{part2\_waci\_cf\_by\_year.csv}).
+The cap is computed as half of the unconstrained MV portfolio's CF in
+the same year. The constraint therefore binds at every rebalance year:
+by definition the unconstrained $P^{mv}$ has $CF=CF(P^{mv})_Y >
+0.5\,CF(P^{mv})_Y$, so feasibility of the constrained problem forces
+$CF(w^{mv,0.5}) \le 0.5\,CF(P^{mv})_Y$ strictly below the unconstrained
+optimum; convexity of the objective then implies the minimiser sits on
+the cap (the KKT multiplier of the inequality is strictly positive in
+every year of our backtest, see Appendix~\ref{app:math}). Halving
+$CF(P^{mv})$ imposes very tight limits in absolute terms (13.6
+\si{tCO_2/M\$} in 2013, 32 in 2024; see Appendix~\ref{app:carbon}).
 
 \subsection{Section 3.3 --- $P^{vw}(0.5)$}\label{sec:vw05}
 
@@ -503,29 +517,32 @@ halving the benchmark's carbon footprint.}
 \label{fig:part2-cum}
 \end{figure}
 
-Three observations stand out.
+Three observations are worth highlighting.
 
-\paragraph{(i) The MV cap is essentially free --- and actually
-beneficial.}
-$P^{mv}(0.5)$ \emph{outperforms} the unconstrained $P^{mv}$ by 21~bp pa
-geometric (3.99\% vs.\ 3.78\%) and lowers volatility by 21~bp as well
-(13.56\% vs.\ 13.77\%). The Sharpe ratio improves from 0.27 to 0.29
-(geometric). The carbon cap functions as a soft constraint against
-concentration in commodity-cyclicals, which happens to be value-additive
-in our sample.
+\paragraph{(i) Adding the cap to the MV portfolio is observed to be
+slightly accretive.}
+$P^{mv}(0.5)$ outperforms the unconstrained $P^{mv}$ by 21\,bp pa
+geometric (3.99\% vs.\ 3.78\%) and lowers volatility by 21\,bp
+(13.56\% vs.\ 13.77\%), with a Sharpe-ratio gain from 0.27 to 0.29
+(geometric). We do not interpret this as evidence that carbon caps
+generically improve risk-adjusted returns: a 21\,bp improvement in
+Sharpe is not statistically distinguishable from zero in a 12-year
+sample, and the direction of the effect could plausibly reverse in
+other windows or universes.
 
-\paragraph{(ii) The VW cap costs roughly 38~bp of geometric return.}
-$P^{vw}(0.5)$ achieves 6.78\% vs.\ 7.16\% for $P^{vw}$ --- a 38~bp pa
-geometric drag, or $\sim$50~bp arithmetic. Volatility increases marginally
-(15.98\% vs.\ 15.81\%): the carbon cap pushes the portfolio away from the
-minimum-variance corner, but only by a few basis points because the
-tracking-error penalty keeps the allocation close to $P^{vw}$.
+\paragraph{(ii) The cap on $P^{vw}$ has a modest observed cost.}
+$P^{vw}(0.5)$ achieves 6.78\% vs.\ 7.16\% for $P^{vw}$ --- a 38\,bp pa
+geometric drag, or $\sim$50\,bp arithmetic. Volatility increases
+marginally (15.98\% vs.\ 15.81\%). The cap pushes the portfolio away
+from the cap-weighted allocation, but only by a few basis points
+because the tracking-error penalty keeps the constrained portfolio
+close to $P^{vw}$.
 
-\paragraph{(iii) Realised tracking error is small.} In all 12 rebalance
-years, the in-sample squared TE under \eqref{eq:vw05} is below
-$10^{-6}$ in scaled units --- the carbon-constrained portfolio is
-genuinely close to the VW benchmark, which is the desired property of a
-real-world ``carbon-aware index'' strategy.
+\paragraph{(iii) Ex-ante tracking error is small.} In all 12 rebalance
+years, the in-sample squared TE of $P^{vw}(0.5)$ relative to $P^{vw}$
+under problem~\eqref{eq:vw05} is below $10^{-6}$ in our scaled
+covariance units. The carbon-constrained portfolio is therefore close
+to the value-weighted benchmark in mean-variance terms.
 
 \subsection{Section 4 --- Net-Zero portfolio $P^{vw}(NZ)$}
 
@@ -559,10 +576,11 @@ divest the remaining high-carbon names.}
 \end{figure}
 
 \paragraph{Performance.} Table~\ref{tab:42} adds the NZ portfolio to the
-VW family comparison. The cumulative-return drag of NZ is
-\emph{smaller} than that of the static 50\% cap (-32~bp vs.\ -38~bp
-geometric), because the NZ constraint starts loose and tightens
-gradually, while the 50\% cap is aggressive from year one.
+VW family comparison. The observed cumulative-return drag of NZ is
+smaller than that of the static 50\% cap ($-32$\,bp vs.\ $-38$\,bp pa
+geometric). A mechanical reason is that the NZ budget starts loose and
+tightens gradually, while the 50\% cap binds aggressively from year
+one (Figure~\ref{fig:part2-nz-cf}).
 
 \begin{table}[ht]
 \centering
@@ -591,15 +609,191 @@ $P^{vw}_{oos}(NZ)$     & 7.92            & 6.84          & 16.01        & 0.49  
 \end{tabular}
 \end{table}
 
-A subtle but important pattern in Figure~\ref{fig:part2-nz-cf} is that
-$P^{vw}(NZ)$ tracks the unconstrained $CF(P^{vw})$ until 2017, then
-detaches. Until that year, the natural decarbonisation of the European
-index is faster than the 10\%-pa glide path; the optimiser is therefore
-free to stay close to $P^{vw}$. From 2018 onwards the glide path bites
-and the portfolio must \emph{actively} divest. This crossover, visible in
-the figure as the convergence of $CF(P^{vw,NZ})$ and $CF(P^{vw})$
-around 2017, is the exact moment when a Paris-aligned mandate stops
-being free.
+A clear pattern in Figure~\ref{fig:part2-nz-cf} is that
+$CF(P^{vw,NZ})$ tracks the unconstrained $CF(P^{vw})$ until 2017 and
+then detaches. In our sample, until that year, the passive index's
+$CF$ declines faster than the 10\%-pa glide path, so the constraint is
+non-binding and the optimal NZ weights coincide with $P^{vw}$. From
+2018 onwards the glide path becomes binding and the portfolio must
+actively divest. We do not claim that this crossover year is robust ---
+it depends entirely on the speed of the index's self-decarbonisation,
+which is a feature of European 2014--2025 and would be different in
+another universe or sample window.
+
+\subsection{Robustness to numerical and cleaning choices}\label{sec:robustness}
+
+The covariance window has 120 monthly observations against
+$n\in[469,600]$ assets, so $\widehat\Sigma_Y$ is rank-deficient at every
+rebalance date. To check how much our results depend on the specific
+cleaning thresholds and the covariance estimator, we re-run the
+$P^{vw}(0.5)$ backtest under five sensitivity scenarios and report the
+out-of-sample annualised return and volatility in
+Table~\ref{tab:robustness}. We focus on $P^{vw}(0.5)$ because it
+combines all the moving pieces: the cleaning filters, the sample
+covariance, and the carbon-constrained QP.
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Robustness of $P^{vw}(0.5)$ to cleaning and covariance
+choices.} \emph{What:} annualised arithmetic and geometric return,
+volatility, and geometric Sharpe ratio of $P^{vw}(0.5)$ under five
+deviations from our baseline configuration.
+\emph{How constructed:} for each row we change one parameter (the
+stale-price threshold, the minimum-history requirement, or the
+covariance estimator) and re-run the entire 2013--2024 backtest;
+everything else is unchanged. The Ledoit--Wolf row uses the linear
+shrinkage estimator of \citet{LedoitWolf2004} on the same 120-month
+estimation window (complete-case rows only).
+\emph{How to read:} the spread across scenarios is 4\,bp pa
+on geometric return and less than 2\,bp on volatility --- the result
+is insensitive to all of the numerical choices we tested. The
+shrinkage covariance improves Sharpe by 0.002, confirming that our
+baseline ridge regularisation is a reasonable substitute for a fully
+disciplined shrinkage estimator.}\label{tab:robustness}
+\small
+\begin{tabular}{l S[table-format=2.2] S[table-format=2.2] S[table-format=2.2] S[table-format=1.3]}
+\toprule
+Scenario                                       & {Arith.\ (\%)} & {Geom.\ (\%)} & {Vol.\ (\%)} & {SR$_{\text{gm}}$} \\
+\midrule
+Baseline (stale 50\%, min 36, sample cov.)     & 8.01           & 6.95          & 15.95        & 0.436              \\
+Stale-price threshold 40\%                     & 8.01           & 6.95          & 15.95        & 0.436              \\
+Stale-price threshold 60\%                     & 8.01           & 6.95          & 15.95        & 0.436              \\
+Minimum history 24 months                      & 8.01           & 6.96          & 15.95        & 0.436              \\
+Minimum history 48 months                      & 8.03           & 6.97          & 15.94        & 0.437              \\
+Ledoit--Wolf shrinkage covariance              & 8.03           & 6.98          & 15.94        & 0.438              \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two remarks. First, varying the stale-price threshold between 40\% and
+60\% does not change the universe in our data because European
+large-caps do not cluster near that filter --- they are either
+clearly traded (zero-return share $\ll 40\%$) or clearly stale
+($\gg 60\%$). Second, the Ledoit--Wolf shrinkage produces nearly
+identical results: the constrained portfolio's KKT structure is
+robust to the covariance estimator. This is a useful sanity check on
+the ridge-plus-rescaling pipeline we use as default.
+
+\subsection{Active-weight decomposition of $P^{vw}(0.5)$}\label{sec:active}
+
+Table~\ref{tab:active-2013} reports the firms with the largest
+overweight and underweight of $P^{vw}(0.5)$ relative to $P^{vw}$ in
+the first rebalance year (2013) and the last (2024). The constrained
+portfolio's main carbon lever is to underweight a small set of
+high-intensity firms: in 2013 the top five underweights are Holcim,
+E.ON, ENEL, RWE and Maersk, with carbon intensities of
+4\,279, 667, 1\,027, 2\,406 and 539 \si{tCO_2/M\$} respectively, all
+well above the universe median. The overweights, by contrast, are
+spread across low-carbon services and asset-management names (Man
+Group, Burberry, Ashmore in 2024).
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Active weights of $P^{vw}(0.5)$ vs.\ $P^{vw}$, 2013
+and 2024.} \emph{What:} the five largest positive (over-) and
+negative (under-) active weights in percentage points, in the first
+and last rebalance years. \emph{How constructed:}
+$\Delta w_i = w_i^{vw,0.5} - w_i^{vw}$, where the constrained weights
+solve problem~\eqref{eq:vw05} with $\bar c = 0.5\,CF(P^{vw})_Y$.
+\emph{How to read:} the underweights are dominated by heavy industrial
+and utility names with carbon intensities above
+500 \si{tCO_2/M\$}, while the overweights are spread across many
+small low-intensity firms. The pattern is consistent with the
+right-skewed carbon distribution: the optimiser cuts a few large
+emitters and redeploys the freed capital diffusely across the
+remaining universe to preserve tracking.}
+\label{tab:active-2013}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{l rrr r}
+\toprule
+Firm                                        & $w^{vw}$ (\%) & $w^{0.5}$ (\%) & $\Delta w$ (pp) & $CI$ (\si{tCO_2/M\$}) \\
+\midrule
+\multicolumn{5}{l}{\textit{2013 --- underweights}} \\
+Holcim                                      & 0.32 & 0.00 & $-0.32$ & 4\,279 \\
+E.ON                                        & 0.44 & 0.14 & $-0.29$ &   667 \\
+Enel                                        & 0.50 & 0.21 & $-0.29$ & 1\,027 \\
+RWE                                         & 0.27 & 0.00 & $-0.27$ & 2\,406 \\
+A.P.\ Møller Mærsk                          & 0.22 & 0.00 & $-0.22$ &   539 \\
+\multicolumn{5}{l}{\textit{2013 --- overweights}} \\
+FLSmidth                                    & 0.04 & 0.13 & $+0.09$ &    18 \\
+Veon ADR                                    & 0.25 & 0.33 & $+0.08$ &    59 \\
+Genus                                       & 0.02 & 0.10 & $+0.08$ &   145 \\
+Man Group                                   & 0.03 & 0.10 & $+0.07$ &     7 \\
+Bilfinger                                   & 0.06 & 0.12 & $+0.06$ &    10 \\
+\midrule
+\multicolumn{5}{l}{\textit{2024 --- underweights}} \\
+Holcim                                      & 0.37 & 0.06 & $-0.31$ & 2\,404 \\
+RWE                                         & 0.23 & 0.00 & $-0.22$ & 1\,738 \\
+Veolia Environnement                        & 0.20 & 0.04 & $-0.16$ &   430 \\
+Heidelberg Materials                        & 0.14 & 0.00 & $-0.14$ & 2\,965 \\
+A.P.\ Møller Mærsk                          & 0.11 & 0.00 & $-0.11$ &   674 \\
+\multicolumn{5}{l}{\textit{2024 --- overweights}} \\
+Burberry Group                              & 0.05 & 0.10 & $+0.05$ &     5 \\
+Ashmore Group                               & 0.02 & 0.06 & $+0.05$ &     1 \\
+Hochschild Mining                           & 0.01 & 0.05 & $+0.05$ &   186 \\
+Ecora Royalties                             & 0.00 & 0.05 & $+0.05$ &     0 \\
+E.ON                                        & 0.29 & 0.33 & $+0.04$ &    56 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+E.ON's appearance on both the 2013 underweight list and the 2024
+overweight list illustrates a feature of carbon-constrained
+optimisation that is sometimes missed in static exclusion approaches:
+firms with rapidly declining carbon intensities cross over from the
+``cut'' side to the ``add'' side of the active-weight book. In our
+data, E.ON's intensity fell from 667 to 56 \si{tCO_2/M\$} between 2013
+and 2024 (a result of its post-2018 corporate restructuring around
+networks and renewables), and the optimiser tracks that transition
+without any human intervention.
+
+\paragraph{Country tilts.} Aggregating the firm-level active weights
+by listing country and averaging over 2013--2024 yields a stable
+geographic pattern (Table~\ref{tab:country-tilt}): Germany is
+underweighted by 38\,bp on average (driven by its heavy industrial
+and utility constituents), while the United Kingdom is overweighted
+by 35\,bp (low-intensity services and asset managers). Sweden, France
+and the Netherlands are also overweighted; Ireland, Switzerland and
+Denmark are underweighted, largely reflecting individual large
+constituents (Heidelberg-CRH-Holcim's Swiss listings, Mærsk in
+Denmark).
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Country-level active tilt of $P^{vw}(0.5)$,
+averaged across 2013--2024.} \emph{What:} country-level mean of
+$\sum_{i \in c} (w_i^{vw,0.5} - w_i^{vw})$ across rebalance years, in
+percentage points. \emph{How constructed:} sum the firm-level active
+weights within each listing country in each year, then average over
+years. \emph{How to read:} the pattern is essentially a substitution
+of carbon-heavy German industrials and Swiss/Danish cyclicals into
+UK-listed services and asset managers; the magnitudes are modest
+($\le 40$\,bp) which is consistent with the tracking-error penalty
+of problem~\eqref{eq:vw05}.}\label{tab:country-tilt}
+\small
+\begin{tabular}{l r l r}
+\toprule
+\multicolumn{2}{c}{\textit{Underweighted}} & \multicolumn{2}{c}{\textit{Overweighted}} \\
+Country & Avg.\ active (pp) & Country & Avg.\ active (pp) \\
+\midrule
+Germany (DE)        & $-0.38$ & United Kingdom (GB)   & $+0.35$ \\
+Ireland (IE)        & $-0.07$ & Sweden (SE)           & $+0.17$ \\
+Switzerland (CH)    & $-0.07$ & France (FR)           & $+0.12$ \\
+Denmark (DK)        & $-0.07$ & Netherlands (NL)      & $+0.10$ \\
+Portugal (PT)       & $-0.06$ & Spain (ES)            & $+0.05$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+We note two caveats. First, listing country is not the same as
+country of operations: many UK-listed firms (e.g.\ Rio Tinto) have
+global emissions footprints. Second, the static panel does not
+include a sector code, so we cannot directly aggregate by sector;
+the firm names in Table~\ref{tab:active-2013} are nonetheless
+informative about which industries the constrained portfolio
+underweights (cement, electric utilities, shipping) and overweights
+(asset managers, branded consumer goods).
 
 % =======================================================================
 \section{Findings, Interpretation and Suggestions}\label{sec:findings}
@@ -608,70 +802,101 @@ being free.
 \subsection{Findings}
 
 \begin{enumerate}[leftmargin=*]
-  \item Over 2014--2025, the European value-weighted benchmark
-        decarbonised by \textbf{58\%} on its own, without any portfolio
-        intervention. Investors who chose a passive value-weighted
-        exposure in 2014 already met more than half of any reasonable
-        Paris-aligned mandate \emph{ex post}.
-  \item A 50\% \emph{ex ante} carbon cap on $P^{vw}$ costs only 38~bp
-        of geometric return and increases tracking error marginally.
-        Decarbonising the benchmark is therefore cheap in the European
-        equity market over this sample.
-  \item A 10\%-per-year Paris-aligned trajectory is even cheaper
-        (-32~bp) because the constraint is non-binding for the first
-        five years.
-  \item Minimum-variance \emph{is} a carbon-friendly allocation:
-        $CF(P^{mv})$ is below $CF(P^{vw})$ in every year, and adding
-        an explicit 50\% carbon cap actually \emph{improves} the
-        Sharpe ratio (0.27 $\to$ 0.29 geometric).
-  \item The carbon distribution of European equities is extremely
-        right-skewed: ten firms (Holcim, Rio Tinto, RWE, \dots)
-        deliver 44\% of $\text{WACI}(P^{vw})$. Selective underweighting
-        of these names is the dominant lever of decarbonisation.
+  \item In our sample, the value-weighted carbon footprint of the
+        European universe declined by 58\% (from 214 to 90
+        \si{tCO_2/M\$}) between 2013 and 2024 without any portfolio
+        intervention. A passive value-weighted exposure therefore
+        decarbonised faster than 10\% pa over the first half of the
+        sample, even before any explicit constraint was imposed.
+  \item A 50\% ex-ante carbon cap on $P^{vw}$ reduced geometric return
+        by $\sim$38\,bp pa relative to the benchmark and increased
+        ex-post volatility by 17\,bp. We refer to this as a
+        \emph{small observed cost}; we do not claim it is generalisable
+        beyond the European 2014--2025 window.
+  \item A 10\%-per-year Paris-aligned trajectory shows an even smaller
+        observed cost ($-32$\,bp pa). The reason is mechanical: the NZ
+        budget is non-binding for the first five years, because the
+        passive index decarbonises faster than $\theta=10\%$ pa over
+        2013--2017.
+  \item The unconstrained minimum-variance portfolio is structurally
+        low-carbon in our data: $CF(P^{mv}) < CF(P^{vw})$ in every
+        year. Adding an explicit 50\% cap also improves the Sharpe
+        ratio (0.27 $\to$ 0.29 geometric), although we caution that
+        Sharpe-ratio rankings between MV and VW are partly
+        sample-dependent (Section~\ref{sec:limits}).
+  \item The carbon distribution is right-skewed: ten firms (Holcim,
+        Rio Tinto, RWE, Air Liquide, Fortum, Enel, Heidelberg
+        Materials, Endesa, EDF, Drax) contribute 44\% of
+        $\text{WACI}(P^{vw})_{2013}$. The active-weight decomposition
+        of Section~\ref{sec:active} confirms that the constrained
+        VW portfolios reduce carbon mainly by underweighting
+        Holcim, RWE, E.ON, ENEL, Maersk and Heidelberg Materials.
 \end{enumerate}
 
 \subsection{Interpretation}
 
-The cheapness of carbon constraints reflects three structural facts.
-\emph{One}, the European carbon-intensity distribution is concentrated:
-the bottom-quintile carbon-intensity firms account for less than 1\% of
-emissions, so excluding the top decile barely shrinks the investable
-universe in cap-weighted terms. \emph{Two}, low-carbon sectors have
-been factor-tail beneficiaries during the sample window (the technology
-and healthcare bull market of 2014--2021), so divesting high-carbon
-names is not penalised by a missing risk premium. \emph{Three}, market
-caps of high-carbon firms have de-rated faster than their emissions have
-declined, which mechanically lowers the population
-$\sum E / \sum \text{MV}$ ratio.
+We interpret these findings as descriptive features of the European
+2014--2025 sample, not as general statements about long-only equity
+decarbonisation. Three observations are \emph{consistent with} the
+small observed cost, but each requires further evidence that lies
+beyond the scope of this analysis:
 
-These three facts are sample-specific. A US-only or emerging-market
-study would deliver a different cost of carbon. The literature
-documents \emph{positive} carbon premia
-\citep{BoltonKacperczyk2021} that would, all else equal, make
-decarbonisation \emph{more} expensive ex ante. The fact that our
-sample shows a small \emph{negative} premium is informative about
-European equity 2014--2025, not about the asset class in general.
+\emph{First}, the empirical carbon-intensity distribution is concentrated
+in our universe: the top-decile firms by carbon intensity capture the
+bulk of total Scope\,1$+$Scope\,2 emissions, so excluding them shrinks
+the investable universe only marginally in cap-weighted terms. We
+document the resulting active-weight pattern in
+Section~\ref{sec:active}, but we do not run a formal sector- or
+factor-attribution analysis.
+
+\emph{Second}, the sample period coincides with a strong relative
+performance of low-carbon sectors (technology, healthcare) and a series
+of European regulatory tightenings (rising EU ETS price, coal-to-gas
+substitution, post-Fukushima nuclear comeback). Disentangling the
+contributions of (a) factor performance, (b) regulatory pricing and
+(c) carbon-specific demand effects would require a dedicated
+attribution model that we do not estimate here. We therefore treat
+their relative weights as an open empirical question.
+
+\emph{Third}, the published literature documents a \emph{positive}
+carbon premium on average \citep{BoltonKacperczyk2021}: high-carbon
+firms have historically earned higher expected returns, which would
+make decarbonisation costly ex ante. Our small observed cost is
+consistent with a near-zero carbon premium in European equities over
+this window, but our sample is too short and too geographically narrow
+to estimate that premium directly.
 
 \subsection{Suggestions for a real implementation}
 
 \begin{itemize}[leftmargin=*]
-  \item \textbf{Use a Net-Zero glide path, not a one-shot 50\% cap.}
-        The NZ portfolio is cheaper, more transparent to communicate
-        (one $\theta$ parameter), and aligned with the EU Climate
-        Transition Benchmark (CTB) regulation.
-  \item \textbf{Combine MV with a carbon cap if drawdown protection
-        matters.} The MV family delivers carbon savings \emph{and}
-        $\sim$200~bp lower volatility, with a Sharpe improvement when
-        the cap is added.
-  \item \textbf{Monitor the top-10 emitters explicitly.}
-        Most of the carbon footprint is delivered by a handful of
-        names; a hard exclusion of the highest-intensity decile would
-        achieve 80\% of the carbon objective with negligible tracking
-        error.
-  \item \textbf{Re-estimate the covariance with a shrinkage estimator}
-        (Ledoit--Wolf, OAS) instead of the raw sample covariance to
-        improve the conditioning of $\widehat\Sigma$ and the stability
-        of the SLSQP solution.
+  \item \textbf{Prefer a glide-path over a static cap when ex-post
+        flexibility matters.} The NZ portfolio is parameterised by a
+        single decarbonisation rate ($\theta$), is aligned with the EU
+        Climate Transition Benchmark regulation, and front-loads the
+        carbon budget so the constraint binds gradually. In our sample
+        it also exhibits a smaller observed performance cost than the
+        static 50\% cap, but a portfolio manager should not assume
+        that ordering is robust to other windows.
+  \item \textbf{Consider MV combined with a carbon cap when the
+        mandate prioritises risk control.} In our sample the
+        constrained $P^{mv}(0.5)$ delivers both an explicit carbon
+        reduction and a marginal improvement in geometric Sharpe.
+        Whether this Sharpe improvement persists out of sample is an
+        open question.
+  \item \textbf{Monitor the top emitters explicitly.} Because the
+        carbon distribution is concentrated, an investment process
+        that tracks the top decile of emitters by intensity and
+        actively trims those holdings is likely to capture most of
+        the carbon reduction with limited tracking error. We do not
+        verify this exact statement formally; we propose it as a
+        practical implication of the active-weight decomposition in
+        Section~\ref{sec:active}.
+  \item \textbf{Use a shrinkage covariance for transparency.}
+        Section~\ref{sec:robustness} shows that Ledoit--Wolf
+        shrinkage yields essentially identical portfolio statistics
+        to our ridge-regularised sample covariance, while resting on
+        more principled statistical foundations. A production
+        implementation should prefer it.
 \end{itemize}
 
 % =======================================================================
@@ -712,15 +937,15 @@ European equity 2014--2025, not about the asset class in general.
 In accordance with the course transparency policy, we disclose that
 generative AI assistants (OpenAI ChatGPT, Anthropic Claude) were used
 during this project for: (i) refactoring intermediate Python prototypes
-into the production pipeline (\texttt{data\_cleaning.py},
-\texttt{portfolio\_part1.py}, \texttt{portfolio\_part2.py}), in particular
-to handle numerical conditioning of the covariance matrix and the
-\textsc{slsqp} solver, (ii) sanity-checking that each implementation
-choice matches the wording of the project specification, and (iii)
-polishing the language of this report. We explicitly confirm that the
-\textbf{core methodological choices, coding decisions, results
-generation, and interpretation of findings are our own work}, and the
-group remains fully responsible for correctness and academic integrity.
+into the production pipeline used to produce the results in this
+report, in particular for the numerical conditioning of the covariance
+matrix and the SLSQP solver; (ii) cross-checking that each
+implementation choice matches the wording of the project
+specification; and (iii) polishing the language of this report. We
+explicitly confirm that the \textbf{core methodological choices,
+coding decisions, results generation, and interpretation of findings
+are our own work}, and the group remains fully responsible for
+correctness and academic integrity.
 
 % =======================================================================
 \appendix
@@ -743,8 +968,7 @@ portfolio in every rebalance year, plus the NZ budget target for
 reference. \emph{How constructed:} for each portfolio we compute
 $\text{WACI}_Y=\sum_i w_{i,Y}\,CI_{i,Y}$ and
 $\text{CF}_Y=\sum_i w_{i,Y}\,E_{i,Y}/\text{MV}_{i,Y}$ using the
-weights produced by the year-$Y$ optimisation. Source file:
-\texttt{outputs\_part2/part2\_waci\_cf\_by\_year.csv}.
+weights produced by the year-$Y$ optimisation.
 \emph{How to read:} the achieved CF of $P^{vw}(0.5)$ matches its
 cap $0.5\cdot CF(P^{vw})_Y$ to within $0.1\,\si{tCO_2/M\$}$ in
 every year, and the achieved CF of $P^{vw}(NZ)$ matches the NZ
@@ -813,11 +1037,8 @@ unconstrained and 50\%-capped MV portfolios, largest weight in the
 two VW-anchored carbon-constrained portfolios, and the binding
 carbon-cap level for each strategy. Largest-weight columns are in
 percent; carbon-cap columns in \si{tCO_2/M\$}.
-\emph{How constructed:} extracted from
-\texttt{outputs\_part1/part1\_allocation\_diagnostics.csv} and
-\texttt{outputs\_part2/part2\_allocation\_diagnostics.csv}, which are
-produced as a side-effect of the annual optimisation loop in
-\texttt{portfolio\_part2.py}.
+\emph{How constructed:} obtained as a side-effect of the annual
+optimisation loop, recorded for every rebalance year.
 \emph{How to read:} the MV columns (10--22\%) and the VW-anchored
 columns (2.7--3.4\%) confirm two very different concentration regimes
 --- MV reaches large single-name bets, while the tracking-error
