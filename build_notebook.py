@@ -53,11 +53,11 @@ they don't exist.
 """))
 
 CELLS.append(code(r"""
-from __future__ import annotations
+%matplotlib inline
 
 import warnings
 from pathlib import Path
-from typing import Iterable, List, Tuple
+from typing import Iterable, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -99,7 +99,7 @@ across all panels, so that every firm has *some* data in every variable.
 """))
 
 CELLS.append(code(r"""
-def _load_panel(filename: str, candidate_filenames: list[str] | None = None) -> pd.DataFrame:
+def _load_panel(filename: str, candidate_filenames: Optional[List[str]] = None) -> pd.DataFrame:
     candidates = [filename] + (candidate_filenames or [])
     for name in candidates:
         path = DATA_DIR / name
@@ -530,7 +530,7 @@ monthly_mv_all, monthly_vw_all = [], []
 monthly_mv_cf_all, monthly_vw_cf_all, monthly_vw_nz_all = [], [], []
 waci_cf_rows = []
 top10_vw_2013 = None
-cf_vw_baseline_y0: float | None = None
+cf_vw_baseline_y0: Optional[float] = None
 
 for y in range(START_REBAL_YEAR, END_REBAL_YEAR + 1):
     investable = build_investment_set(y)
