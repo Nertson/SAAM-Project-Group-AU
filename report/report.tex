@@ -622,6 +622,189 @@ in Section~\ref{sec:findings} are our own work, and the group remains
 fully responsible for correctness and academic integrity.
 
 % =======================================================================
+\appendix
+\section{Year-by-year carbon metrics for the five portfolios}\label{app:carbon}
+% =======================================================================
+
+Table~\ref{tab:carbon-by-year} reports the realised WACI and CF of the five
+portfolios at every rebalance year. The Net-Zero target column shows the
+carbon budget $0.9^{Y-2012}\cdot CF(P^{vw})_{2013}$ used as the binding
+constraint for $P^{vw}(NZ)$ in that year. As expected, both the 50\% cap
+and the NZ glide path bind exactly in every year (the achieved CF equals
+the cap to the third decimal), which is the empirical signature of a
+well-converged constrained optimum.
+
+\begin{table}[ht]
+\centering
+\caption{Year-by-year WACI and CF (\si{tCO_2/M\$}). Source:
+\texttt{outputs\_part2/part2\_waci\_cf\_by\_year.csv}.}
+\label{tab:carbon-by-year}
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{c rr rr rr rr rr r}
+\toprule
+& \multicolumn{2}{c}{$P^{mv}$} & \multicolumn{2}{c}{$P^{vw}$}
+& \multicolumn{2}{c}{$P^{mv}(0.5)$} & \multicolumn{2}{c}{$P^{vw}(0.5)$}
+& \multicolumn{2}{c}{$P^{vw}(NZ)$} & NZ \\
+$Y$ & WACI & CF & WACI & CF & WACI & CF & WACI & CF & WACI & CF & target \\
+\midrule
+2013 &  61.7 &   27.2 & 136.1 & 214.2 &  26.6 &   13.6 &  83.8 & 107.1 & 125.8 & 192.8 & 192.8 \\
+2014 & 243.7 & 1583.5 & 127.1 & 185.4 & 136.0 &  791.7 &  77.6 &  92.7 & 122.8 & 173.5 & 173.5 \\
+2015 & 173.5 &  423.9 & 155.2 & 193.4 & 101.0 &  211.9 &  94.6 &  96.7 & 135.3 & 156.2 & 156.2 \\
+2016 & 184.9 & 1044.9 & 150.2 & 205.3 & 113.4 &  522.5 &  93.0 & 102.7 & 121.5 & 140.6 & 140.6 \\
+2017 & 250.7 &  366.5 & 171.6 & 185.4 & 141.7 &  183.3 & 104.3 &  92.7 & 136.5 & 126.5 & 126.5 \\
+2018 & 132.7 &  180.5 & 134.9 & 143.8 &  77.7 &   90.2 &  78.0 &  71.9 & 117.9 & 113.8 & 113.8 \\
+2019 &  76.2 &   35.9 & 139.1 & 153.3 &  38.8 &   17.9 &  80.5 &  76.6 & 102.1 & 102.5 & 102.5 \\
+2020 & 145.1 &   55.6 & 132.0 & 125.0 &  78.5 &   27.8 &  68.8 &  62.5 & 106.2 &  92.2 &  92.2 \\
+2021 & 121.8 &   38.0 & 133.8 & 117.5 &  50.2 &   19.0 &  77.2 &  58.7 & 104.2 &  83.0 &  83.0 \\
+2022 &  46.1 &   43.5 & 106.6 &  98.7 &  28.1 &   21.8 &  64.5 &  49.3 &  89.9 &  74.7 &  74.7 \\
+2023 &  41.1 &  120.6 &  79.7 &  96.1 &  37.2 &   60.3 &  50.6 &  48.1 &  65.8 &  67.2 &  67.2 \\
+2024 &  37.7 &   63.9 &  83.3 &  89.5 &  22.6 &   31.9 &  54.1 &  44.8 &  68.5 &  60.5 &  60.5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The MV portfolio's WACI spikes in 2014 (and to a lesser extent 2015--2017)
+are driven by a single Russian steel name, EVRAZ, which the minimum-variance
+optimiser briefly assigns a non-trivial weight to. The firm is suspended
+from trading in late 2023, hence its disappearance from the optimal MV
+basket after 2022. This is a useful reminder that minimum-variance is
+\emph{not} a carbon strategy; the apparently low carbon footprint of the
+MV portfolio relative to VW is a side effect of the volatility objective
+and can break in pathological years.
+
+% =======================================================================
+\section{Allocation diagnostics and solver health}\label{app:alloc}
+% =======================================================================
+
+Table~\ref{tab:alloc} gathers the year-by-year allocation diagnostics:
+the size of the investable universe, the largest single-name weight in
+each portfolio, and the binding carbon-cap value. The largest VW weight
+(not shown, as it is firm-driven and barely changes through the sample)
+is approximately 3.1\% (TotalEnergies / SAP), versus 10--22\% for the
+minimum-variance portfolio. Note how the carbon-constrained variants
+$P^{vw}(0.5)$ and $P^{vw}(NZ)$ retain VW-like concentration profiles
+(largest weight $\sim$3\%), which confirms that the tracking-error
+penalty in problem~\eqref{eq:vw05} effectively pins the constrained
+solution close to the cap-weighted benchmark.
+
+\begin{table}[ht]
+\centering
+\caption{Allocation diagnostics by rebalance year. ``Largest weight''
+columns are in \%; ``CF cap'' columns in \si{tCO_2/M\$}. Source:
+\texttt{outputs\_part1/part1\_allocation\_diagnostics.csv} and
+\texttt{outputs\_part2/part2\_allocation\_diagnostics.csv}.}
+\label{tab:alloc}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{c c rr rr r rr}
+\toprule
+$Y$ & $|U_Y|$ & \multicolumn{2}{c}{Largest weight (\%)} &
+\multicolumn{2}{c}{Largest weight (\%)} &
+\multicolumn{3}{c}{Carbon cap (\si{tCO_2/M\$})} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-9}
+& & $P^{mv}$ & $P^{mv}(0.5)$ & $P^{vw}(0.5)$ & $P^{vw}(NZ)$ &
+$P^{mv}(0.5)$ & $P^{vw}(0.5)$ & $P^{vw}(NZ)$ \\
+\midrule
+2013 & 469 & 21.8 & 18.7 & 3.06 & 3.07 &  13.6 & 107.1 & 192.8 \\
+2014 & 487 & 22.0 & 20.8 & 2.74 & 2.76 & 791.7 &  92.7 & 173.5 \\
+2015 & 505 & 16.5 & 16.9 & 2.77 & 2.77 & 211.9 &  96.7 & 156.2 \\
+2016 & 512 & 14.8 & 14.6 & 2.95 & 2.95 & 522.5 & 102.7 & 140.6 \\
+2017 & 525 & 14.9 & 14.1 & 2.97 & 2.96 & 183.3 &  92.7 & 126.5 \\
+2018 & 546 & 10.1 & 10.7 & 2.68 & 2.67 &  90.2 &  71.9 & 113.8 \\
+2019 & 572 & 10.6 & 11.5 & 3.06 & 3.05 &  17.9 &  76.6 & 102.5 \\
+2020 & 591 & 16.5 & 18.9 & 3.26 & 3.24 &  27.8 &  62.5 &  92.2 \\
+2021 & 600 & 11.5 & 13.9 & 3.05 & 3.04 &  19.0 &  58.7 &  83.0 \\
+2022 & 590 & 14.5 & 14.3 & 3.09 & 3.08 &  21.8 &  49.3 &  74.7 \\
+2023 & 575 & 15.2 & 15.1 & 3.12 & 3.12 &  60.3 &  48.1 &  67.2 \\
+2024 & 563 & 13.1 & 13.9 & 3.43 & 3.40 &  31.9 &  44.8 &  60.5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Solver health.} Every constrained optimisation reached a
+feasible KKT point with the carbon constraint active to numerical
+precision. In SLSQP scaled units the in-sample tracking-error squared
+$(w-w^{vw})'\,\widehat\Sigma\,(w-w^{vw})$ was non-negative and
+$\le 3\cdot 10^{-6}$ in every year of the VW-family runs, which we take
+as the empirical signature of good convergence (see
+Section~\ref{sec:vw05}).
+
+% =======================================================================
+\section{Additional figures}\label{app:figs}
+% =======================================================================
+
+Figure~\ref{fig:mv-family-cf} isolates the MV-family carbon trajectories,
+which are hard to read in the dual panel of Figure~\ref{fig:part2-cf-split}
+because of the scale gap (MV-family CFs are an order of magnitude smaller
+than the VW family). The EVRAZ spikes of 2014--2017 are clearly visible
+on $P^{mv}$. The constrained $P^{mv}(0.5)$ tames these spikes by
+construction, since the cap is recomputed annually as half of the
+unconstrained CF of the same year.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.78\linewidth]{part2_carbon_footprint_mv_family.png}
+\caption{Year-by-year WACI and CF of the minimum-variance family.}
+\label{fig:mv-family-cf}
+\end{figure}
+
+Figure~\ref{fig:excess} translates the VW-family results into excess
+returns vs.\ $P^{vw}$. The 50\%-cap portfolio drifts $\sim$5\%
+below the benchmark over 12 years; the NZ portfolio drifts $\sim$4\%
+below. Most of the cumulative drag accrues during 2020--2022, when
+high-carbon energy and materials names rebounded strongly from the
+2020 trough.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.78\linewidth]{part2_excess_return_vs_vw.png}
+\caption{Cumulative excess return of $P^{vw}(0.5)$ and $P^{vw}(NZ)$
+relative to $P^{vw}$, Jan 2014 -- Dec 2025.}
+\label{fig:excess}
+\end{figure}
+
+% =======================================================================
+\section{Mathematical notes}\label{app:math}
+% =======================================================================
+
+\subsection{Squared vs.\ root tracking error}
+
+The project specification states the tracking-error objective as
+\(\text{TE}(P) = \sqrt{(w-w^{vw})'\Sigma(w-w^{vw})}\).
+We implement the equivalent
+\(\text{TE}^2(P) = (w-w^{vw})'\Sigma(w-w^{vw})\). Because the square-root
+function is strictly increasing on $[0,\infty)$ and the squared TE is
+non-negative on the feasible set, the two problems share the same
+argmin:
+\[
+  \arg\min_{w\in\mathcal{F}} \sqrt{(w-w^{vw})'\Sigma(w-w^{vw})}
+  \;=\;
+  \arg\min_{w\in\mathcal{F}} (w-w^{vw})'\Sigma(w-w^{vw}).
+\]
+Working with the squared form avoids the non-differentiability of the
+square root at zero and yields a closed-form quadratic objective that
+SLSQP can exploit directly.
+
+\subsection{KKT conditions for the carbon-constrained QP}
+
+Problem~\eqref{eq:vw05} is a convex QP with feasible set
+$\mathcal{F}=\{w:\mathbf{1}'w=1,\;0\le w\le \mathbf{1},\;c'w\le \bar c\}$,
+where $c_i=E_{i,Y}/\text{MV}_{i,Y}$ and $\bar c=0.5\cdot CF(P^{vw})_Y$.
+The KKT conditions at an optimum $w^*$ are
+\begin{align*}
+  2\,\Sigma(w^*-w^{vw}) - \lambda\,\mathbf{1} + \mu\,c + \nu_- - \nu_+ &= 0 \\
+  \mathbf{1}'w^* &= 1 \\
+  c'w^* &\le \bar c, \quad \mu\ge 0, \quad \mu\,(\bar c - c'w^*) = 0 \\
+  0 \le w^*_i \le 1, \quad \nu_{-,i},\nu_{+,i}\ge 0 \\
+  \nu_{-,i}\,w^*_i = 0, \quad \nu_{+,i}\,(1-w^*_i) = 0.
+\end{align*}
+In our runs, the cap is binding in every year ($\mu>0$ and
+$c'w^*=\bar c$), and the bound constraints are typically active only on
+high-carbon names that the optimiser zeros out --- i.e.\
+$\nu_{-,i}>0,\;w^*_i=0$ for $i$ such that $c_i\gg \bar c$.
+
+% =======================================================================
 \section*{References}\addcontentsline{toc}{section}{References}
 % =======================================================================
 
