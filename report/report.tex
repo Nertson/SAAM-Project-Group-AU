@@ -178,18 +178,7 @@ providers.
 \begin{table}[H]
 \centering
 \small
-\caption{\textbf{Investable universe size by rebalance year.}
-\emph{What:} number of European firms eligible to receive a non-zero
-weight at the December-$Y$ rebalance. \emph{How constructed:} firms
-passing all five cleaning rules of Section~\ref{sec:cleaning}
-(price floor, returns-from-prices with delisting, minimum 36 monthly
-observations in the 120-month estimation window, stale-price filter,
-non-missing carbon and revenue) and also having a non-missing
-year-end \textsc{ri} and \textsc{ci} in year $Y$. \emph{How to read:}
-universe grows monotonically from 469 (2013) to a peak of 600 (2021)
-as Datastream's Scope\,1$+$Scope\,2 coverage extends to mid-cap names;
-the slight decline after 2021 reflects delistings (notably EDF in 2023
-and Russian-listed names suspended in 2022).}\label{tab:n-inv}
+\caption{Investable universe size by rebalance year}\label{tab:n-inv}
 \begin{tabular}{l*{12}{c}}
 \toprule
 $Y$ & 13 & 14 & 15 & 16 & 17 & 18 & 19 & 20 & 21 & 22 & 23 & 24 \\
@@ -197,6 +186,18 @@ $n$ & 469 & 487 & 505 & 512 & 525 & 546 & 572 & 591 & 600 & 590 & 575 & 563 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\noindent{\small\textit{Note.} Number of European firms eligible to
+receive a non-zero weight at the December-$Y$ rebalance, i.e.\ firms
+passing all five cleaning rules of Section~\ref{sec:cleaning} (price
+floor, returns-from-prices with delisting, minimum 36 monthly
+observations in the 120-month estimation window, stale-price filter,
+non-missing carbon and revenue) and having a non-missing year-end
+\textsc{ri} and \textsc{ci} in year $Y$. The universe grows
+monotonically from 469 firms in 2013 to a peak of 600 in 2021 as
+Datastream's Scope\,1$+$Scope\,2 coverage extends to mid-cap names;
+the slight decline after 2021 reflects delistings (notably EDF in
+2023 and Russian-listed names suspended in 2022).\par}
 
 \subsection{Portfolio definitions}
 
@@ -239,21 +240,7 @@ project specification.
 
 \begin{table}[H]
 \centering
-\caption{\textbf{Part~I --- annualised statistics, Jan 2014 -- Dec 2025.}
-\emph{What:} risk-return summary of the two Part~I portfolios.
-\emph{How constructed:} weights $w_Y^p$ are re-optimised every December
-$Y\in\{2013,\dots,2024\}$ using the 120 trailing monthly returns; they
-are then applied to the following calendar year with end-of-month
-buy-and-hold drift. Statistics are computed on the resulting monthly
-out-of-sample return series: arithmetic return $=$ monthly mean
-$\times 12$, geometric return $= (1+R)_\text{prod}^{12/T}-1$,
-volatility $=$ monthly std $\times \sqrt{12}$, Sharpe ratios use a
-zero risk-free rate as in the project template. \emph{How to read:}
-minimum-variance halves geometric return ($-338$\,bp) and trims
-volatility by $\sim$200\,bp, but its Sharpe ratio is materially below
-the value-weighted benchmark in both arithmetic ($0.34$ vs.\ $0.52$)
-and geometric terms ($0.27$ vs.\ $0.45$), consistent with
-under-performance of low-volatility tilts in trending bull markets.}
+\caption{Part~I annualised statistics, Jan 2014 -- Dec 2025}
 \label{tab:part1-stats}
 \small
 \begin{tabular}{l S[table-format=2.2] S[table-format=2.2] S[table-format=2.2] S[table-format=1.2] S[table-format=1.2] S[table-format=-2.2] S[table-format=2.2]}
@@ -267,22 +254,37 @@ $P^{vw}_{oos}$         & 8.18       & 7.16       & 15.81      & 0.52            
 \end{tabular}
 \end{table}
 
+\noindent{\small\textit{Note.} Risk-return summary of the two Part~I
+portfolios. Weights $w_Y^p$ are re-optimised every December
+$Y\in\{2013,\dots,2024\}$ using the 120 trailing monthly returns and
+applied to the following calendar year with end-of-month buy-and-hold
+drift. Arithmetic return is monthly mean $\times 12$, geometric
+return is $(1+R)_\text{prod}^{12/T}-1$, volatility is monthly std
+$\times \sqrt{12}$, and the Sharpe ratios use a zero risk-free rate
+as in the project template. Minimum-variance halves geometric return
+($-338$\,bp) and trims volatility by $\sim$200\,bp, but its Sharpe
+ratio is materially below the value-weighted benchmark in both
+arithmetic ($0.34$ vs.\ $0.52$) and geometric terms ($0.27$ vs.\
+$0.45$), consistent with the under-performance of low-volatility
+tilts in trending bull markets.\par}
+
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.82\linewidth]{part1_cumulative_returns.png}
-\caption{\textbf{Cumulative wealth of \$1 invested in $P^{mv}$ and
-$P^{vw}$, Jan 2014 -- Dec 2025.} \emph{What:} growth of \$1 held over
-the 12-year out-of-sample horizon. \emph{How constructed:} the monthly
-return series of each portfolio is compounded as
-$W_t = \prod_{s\le t}(1+R_s)$, with $R_s$ produced by the annual
-rebalancing loop described in Section~\ref{sec:partI}.
-\emph{How to read:} the two curves track each other until 2017, after
-which the technology-led bull market lifts the cap-weighted benchmark
-markedly above the minimum-variance allocation; the 2022 drawdown
-hits both portfolios similarly but $P^{vw}$ recovers faster, ending
-the period at \$2.3 versus \$1.5 for $P^{mv}$.}
+\caption{Cumulative wealth of \$1 invested in $P^{mv}$ and $P^{vw}$,
+Jan 2014 -- Dec 2025}
 \label{fig:part1-cum}
 \end{figure}
+
+\noindent{\small\textit{Note.} Growth of \$1 held over the 12-year
+out-of-sample horizon, compounded as $W_t = \prod_{s\le t}(1+R_s)$
+from the monthly return series of each portfolio produced by the
+annual rebalancing loop described in Section~\ref{sec:partI}. The
+two curves track each other until 2017, after which the
+technology-led bull market lifts the cap-weighted benchmark above
+the minimum-variance allocation; the 2022 drawdown hits both
+portfolios similarly but $P^{vw}$ recovers faster, ending the period
+at \$2.3 versus \$1.5 for $P^{mv}$.\par}
 
 \paragraph{Reading the table.} Minimum variance halves \emph{geometric}
 return relative to the value-weighted benchmark (3.78\% vs.\ 7.16\%), but
@@ -336,16 +338,7 @@ adjusting a handful of weights rather than rebuilding the whole portfolio.
 
 \begin{table}[H]
 \centering
-\caption{\textbf{Top 10 WACI contributors of $P^{vw}$ in 2013.}
-\emph{What:} the ten largest contributors to the value-weighted
-benchmark's WACI in the first rebalance year. \emph{How constructed:}
-for each firm $i$ in the 2013 universe we compute
-$w_i^{vw}\cdot CI_i$ and sort descending. \emph{How to read:} ten
-names deliver $60.4$ \si{tCO_2/M\$} out of
-$\text{WACI}(P^{vw})_{2013}=136.1$ ($\sim$44\% of the benchmark's
-carbon intensity). The active-weight decomposition in
-Section~\ref{sec:active} shows that the carbon-constrained portfolios
-indeed concentrate their adjustments on this short list.}
+\caption{Top 10 WACI contributors of $P^{vw}$ in 2013}
 \label{tab:top10-vw}
 \small
 \begin{tabular}{rlrrr}
@@ -369,24 +362,36 @@ Rank & Name & Weight (\%) & $CI$ (\si{tCO_2/M\$}) & Contribution \\
 \end{tabular}
 \end{table}
 
+\noindent{\small\textit{Note.} The ten largest contributors to the
+value-weighted benchmark's WACI in the first rebalance year. For
+each firm $i$ in the 2013 universe we compute $w_i^{vw}\cdot CI_i$
+and sort descending. Ten names deliver 60.4 \si{tCO_2/M\$} out of
+$\text{WACI}(P^{vw})_{2013}=136.1$, i.e.\ $\sim$44\% of the
+benchmark's carbon intensity; the active-weight decomposition in
+Section~\ref{sec:active} shows that the carbon-constrained portfolios
+concentrate their adjustments on this short list.\par}
+
 \subsection{Carbon footprint of the unconstrained benchmarks}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\linewidth]{part2_carbon_footprint_split.png}
-\caption{\textbf{Year-by-year carbon footprint (CF) and WACI, split
-by portfolio family.} \emph{What:} MV family (left) and VW family
-(right). \emph{How constructed:} year-$Y$ weights applied to
-$E_{i,Y}/\text{MV}_{i,Y}$ (CF) and $CI_{i,Y}$ (WACI) per
-equations~\eqref{eq:waci}--\eqref{eq:cf}; dashed yellow on the right
-panel is the NZ budget $0.9^{(Y-2012)}\cdot CF(P^{vw})_{2013}$.
-\emph{How to read:} the VW benchmark decarbonises by $\sim$58\% over
-the sample (CF from 214 to 90 \si{tCO_2/M\$}); both VW-constrained
-variants bind in every year. The MV portfolio is structurally low-CF
-(below VW throughout); the 2014--2017 spike is the EVRAZ episode
-detailed in Appendix~\ref{app:carbon}.}
+\caption{Year-by-year carbon footprint and WACI, split by portfolio
+family}
 \label{fig:part2-cf-split}
 \end{figure}
+
+\noindent{\small\textit{Note.} Left panel shows the MV family, right
+panel the VW family. CF and WACI are computed by applying year-$Y$
+weights to $E_{i,Y}/\text{MV}_{i,Y}$ (for CF) and $CI_{i,Y}$ (for
+WACI) per equations~\eqref{eq:waci}--\eqref{eq:cf}; the dashed yellow
+line on the right panel is the NZ budget
+$0.9^{(Y-2012)}\cdot CF(P^{vw})_{2013}$. The VW benchmark
+decarbonises by $\sim$58\% over the sample (CF from 214 to 90
+\si{tCO_2/M\$}) and both VW-constrained variants bind in every year.
+The MV portfolio is structurally low-CF (below VW throughout); the
+2014--2017 spike is the EVRAZ episode detailed in
+Appendix~\ref{app:carbon}.\par}
 
 Two findings on Figure~\ref{fig:part2-cf-split} are worth flagging.
 
@@ -464,21 +469,8 @@ philosophy.
 
 \begin{table}[H]
 \centering
-\caption{\textbf{Section 3.4 --- four-way performance comparison.}
-\emph{What:} risk-return summary of the two benchmark portfolios and
-their carbon-constrained counterparts. \emph{How constructed:} same
-backtest mechanics as Table~\ref{tab:part1-stats} (annual rebalancing,
-buy-and-hold within year). The carbon-constrained portfolios solve
-the QPs of equations~\eqref{eq:mv05} and~\eqref{eq:vw05} with the
-constraint $CF(P)\le 0.5\cdot CF(\text{anchor})$, recomputed every
-year. \emph{How to read:} horizontal pairs isolate the observed cost of a
-50\% carbon reduction inside each allocation philosophy. Adding the
-cap to $P^{mv}$ is observed to be slightly accretive ($+21$\,bp
-geometric, lower volatility), a result consistent with the
-constrained portfolio moving away from concentrated positions in
-high-carbon cyclicals; we do not test that mechanism formally. The VW
-cap shows a $-38$\,bp geometric ($-50$\,bp arithmetic) drag for a
-50\% carbon reduction.}\label{tab:34}
+\caption{Four-way performance comparison: MV and VW with and without
+a 50\% carbon cap}\label{tab:34}
 \small
 \begin{tabular}{l S[table-format=2.2] S[table-format=2.2] S[table-format=2.2] S[table-format=1.2]}
 \toprule
@@ -492,20 +484,36 @@ $P^{vw}_{oos}(0.5)$    & 7.85            & 6.78          & 15.98        & 0.49  
 \end{tabular}
 \end{table}
 
+\noindent{\small\textit{Note.} Risk-return summary of the two
+benchmark portfolios and their carbon-constrained counterparts. Same
+backtest mechanics as Table~\ref{tab:part1-stats} (annual
+rebalancing, buy-and-hold within year). The carbon-constrained
+portfolios solve the QPs of equations~\eqref{eq:mv05}
+and~\eqref{eq:vw05} with $CF(P)\le 0.5\cdot CF(\text{anchor})$,
+recomputed every year. Horizontal pairs isolate the observed cost
+of a 50\% carbon reduction inside each allocation philosophy. Adding
+the cap to $P^{mv}$ is observed to be slightly accretive ($+21$\,bp
+geometric, lower volatility) --- a result consistent with the
+constrained portfolio moving away from concentrated positions in
+high-carbon cyclicals, although we do not test that mechanism
+formally. The VW cap shows a $-38$\,bp geometric ($-50$\,bp
+arithmetic) drag for a 50\% carbon reduction.\par}
+
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\linewidth]{part2_cumulative_returns.png}
-\caption{\textbf{Section 3.4 cumulative returns.} \emph{What:} growth
-of \$1 invested in each portfolio between Jan 2014 and Dec 2025.
-\emph{How constructed:} the OOS monthly return series of each
-portfolio is compounded as $W_t=\prod_{s\le t}(1+R_s)$; left panel
-pairs the minimum-variance family, right panel the value-weighted
-family. \emph{How to read:} the dashed $P^{mv}(0.5)$ ends slightly
-above $P^{mv}$ in the left panel; the dashed $P^{vw}(0.5)$ ends
-$\sim$5\% below $P^{vw}$ in the right panel after 12 years of
-compounding.}
+\caption{Section 3.4 cumulative returns of the four portfolios}
 \label{fig:part2-cum}
 \end{figure}
+
+\noindent{\small\textit{Note.} Growth of \$1 invested in each
+portfolio between Jan 2014 and Dec 2025. The OOS monthly return
+series of each portfolio is compounded as
+$W_t=\prod_{s\le t}(1+R_s)$; the left panel pairs the
+minimum-variance family, the right panel the value-weighted family.
+The dashed $P^{mv}(0.5)$ ends slightly above $P^{mv}$ in the left
+panel; the dashed $P^{vw}(0.5)$ ends $\sim$5\% below $P^{vw}$ in the
+right panel after 12 years of compounding.\par}
 
 Three observations are worth highlighting.
 
@@ -547,19 +555,20 @@ and at $Y=2024$ it is $\le 0.9^{12}\times 214.2 = 60.5$.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\linewidth]{part2_carbon_footprint_vw_family.png}
-\caption{\textbf{Carbon trajectory of the value-weighted family with
-the Net-Zero glide path.} \emph{What:} year-by-year CF
-(\si{tCO_2/M\$}) of $P^{vw}$, $P^{vw}(0.5)$ and $P^{vw}(NZ)$ together
-with the NZ budget. \emph{How constructed:}
+\caption{Carbon trajectory of the value-weighted family with the
+Net-Zero glide path}
+\label{fig:part2-nz-cf}
+\end{figure}
+
+\noindent{\small\textit{Note.} Year-by-year CF (\si{tCO_2/M\$}) of
+$P^{vw}$, $P^{vw}(0.5)$ and $P^{vw}(NZ)$ together with the NZ budget.
 $CF_Y=\sum_i w_{i,Y}\,E_{i,Y}/\text{MV}_{i,Y}$ using the year-$Y$
 weights; the NZ budget is
 $0.9^{(Y-2012)}\cdot CF(P^{vw})_{2013}=0.9^{(Y-2012)}\cdot 214.2$.
-\emph{How to read:} both constrained portfolios bind in every year.
-The NZ line tracks $P^{vw}$ until 2017 (the index decarbonises faster
+Both constrained portfolios bind in every year. The NZ line tracks
+$P^{vw}$ until 2017 (in our sample the index decarbonises faster
 than 10\% pa over 2013--2017) and then detaches as the glide path
-becomes the binding constraint.}
-\label{fig:part2-nz-cf}
-\end{figure}
+becomes the binding constraint.\par}
 
 \paragraph{Performance.} Table~\ref{tab:42} adds the NZ portfolio to the
 VW family comparison. The observed cumulative-return drag of NZ is
@@ -570,16 +579,8 @@ one (Figure~\ref{fig:part2-nz-cf}).
 
 \begin{table}[H]
 \centering
-\caption{\textbf{Section 4.2 --- Net-Zero comparison.} \emph{What:}
-risk-return summary of $P^{vw}$, $P^{vw}(0.5)$ and $P^{vw}(NZ)$ over
-Jan 2014 -- Dec 2025. \emph{How constructed:} same backtest as
-Table~\ref{tab:34}; the NZ portfolio solves~\eqref{eq:vw05} every
-year with a time-varying cap
-$\bar c_Y = 0.9^{(Y-2012)}\cdot CF(P^{vw})_{2013}$ instead of the
-static $0.5\cdot CF(P^{vw})_Y$. \emph{How to read:} $P^{vw}(NZ)$
-underperforms $P^{vw}$ by 32\,bp pa geometric --- less than the
-38\,bp drag of the static 50\% cap --- while ending the horizon with
-a 72\% carbon reduction vs.\ the benchmark.}\label{tab:42}
+\caption{Net-Zero comparison of $P^{vw}$, $P^{vw}(0.5)$ and
+$P^{vw}(NZ)$}\label{tab:42}
 \small
 \begin{tabular}{l S[table-format=2.2] S[table-format=2.2] S[table-format=2.2] S[table-format=1.2]}
 \toprule
@@ -591,6 +592,16 @@ $P^{vw}_{oos}(NZ)$     & 7.92            & 6.84          & 16.01        & 0.49  
 \bottomrule
 \end{tabular}
 \end{table}
+
+\noindent{\small\textit{Note.} Risk-return summary of $P^{vw}$,
+$P^{vw}(0.5)$ and $P^{vw}(NZ)$ over Jan 2014 -- Dec 2025. Same
+backtest as Table~\ref{tab:34}; the NZ portfolio solves
+problem~\eqref{eq:vw05} every year with a time-varying cap
+$\bar c_Y = 0.9^{(Y-2012)}\cdot CF(P^{vw})_{2013}$ instead of the
+static $0.5\cdot CF(P^{vw})_Y$. $P^{vw}(NZ)$ underperforms $P^{vw}$
+by 32\,bp pa geometric --- less than the 38\,bp drag of the static
+50\% cap --- while ending the horizon with a 72\% carbon reduction
+vs.\ the benchmark.\par}
 
 A clear pattern in Figure~\ref{fig:part2-nz-cf} is that
 $CF(P^{vw,NZ})$ tracks the unconstrained $CF(P^{vw})$ until 2017 and
@@ -617,16 +628,8 @@ covariance, and the carbon-constrained QP.
 
 \begin{table}[H]
 \centering
-\caption{\textbf{Robustness of $P^{vw}(0.5)$ to cleaning and covariance
-choices.} \emph{What:} annualised return, volatility and geometric
-Sharpe of $P^{vw}(0.5)$ under five deviations from baseline.
-\emph{How constructed:} each row changes one parameter
-(stale-price threshold, minimum history, or covariance estimator) and
-re-runs the entire 2013--2024 backtest; the Ledoit--Wolf row uses
-the linear shrinkage estimator of \citet{LedoitWolf2004}.
-\emph{How to read:} the spread across scenarios is 4\,bp pa on
-geometric return and $<$2\,bp on volatility --- results are
-insensitive to the numerical choices we tested.}\label{tab:robustness}
+\caption{Robustness of $P^{vw}(0.5)$ to cleaning and covariance
+choices}\label{tab:robustness}
 \small
 \begin{tabular}{l S[table-format=2.2] S[table-format=2.2] S[table-format=2.2] S[table-format=1.3]}
 \toprule
@@ -641,6 +644,15 @@ Ledoit--Wolf shrinkage covariance              & 8.03           & 6.98          
 \bottomrule
 \end{tabular}
 \end{table}
+
+\noindent{\small\textit{Note.} Annualised return, volatility and
+geometric Sharpe of $P^{vw}(0.5)$ under five deviations from
+baseline. Each row changes one parameter (stale-price threshold,
+minimum history, or covariance estimator) and re-runs the entire
+2013--2024 backtest; the Ledoit--Wolf row uses the linear shrinkage
+estimator of \citet{LedoitWolf2004}. The spread across scenarios is
+4\,bp pa on geometric return and $<$2\,bp on volatility --- results
+are insensitive to the numerical choices we tested.\par}
 
 Two remarks. First, varying the stale-price threshold between 40\% and
 60\% does not change the universe in our data because European
@@ -666,16 +678,7 @@ Group, Burberry, Ashmore in 2024).
 
 \begin{table}[H]
 \centering
-\caption{\textbf{Active weights of $P^{vw}(0.5)$ vs.\ $P^{vw}$, 2013
-and 2024.} \emph{What:} the five largest over- and underweights in
-percentage points, in the first and last rebalance years.
-\emph{How constructed:}
-$\Delta w_i = w_i^{vw,0.5} - w_i^{vw}$, with the constrained weights
-solving~\eqref{eq:vw05} under $\bar c = 0.5\,CF(P^{vw})_Y$.
-\emph{How to read:} the underweights are concentrated on a handful
-of high-intensity industrial and utility names; the overweights are
-diffuse across low-intensity firms --- a pattern consistent with the
-right-skewed carbon distribution.}
+\caption{Active weights of $P^{vw}(0.5)$ vs.\ $P^{vw}$, 2013 and 2024}
 \label{tab:active-2013}
 \small
 \setlength{\tabcolsep}{4pt}
@@ -712,6 +715,16 @@ E.ON                                        & 0.29 & 0.33 & $+0.04$ &    56 \\
 \end{tabular}
 \end{table}
 
+\noindent{\small\textit{Note.} The five largest over- and
+underweights of $P^{vw}(0.5)$ relative to $P^{vw}$ in percentage
+points, in the first and last rebalance years.
+$\Delta w_i = w_i^{vw,0.5} - w_i^{vw}$, with the constrained weights
+solving~\eqref{eq:vw05} under $\bar c = 0.5\,CF(P^{vw})_Y$. The
+underweights are concentrated on a handful of high-intensity
+industrial and utility names; the overweights are diffuse across
+low-intensity firms --- a pattern consistent with the right-skewed
+carbon distribution.\par}
+
 E.ON's appearance on both the 2013 underweight list and the 2024
 overweight list illustrates a feature of carbon-constrained
 optimisation that is sometimes missed in static exclusion approaches:
@@ -735,16 +748,8 @@ Denmark).
 
 \begin{table}[H]
 \centering
-\caption{\textbf{Country-level active tilt of $P^{vw}(0.5)$,
-averaged across 2013--2024.} \emph{What:} mean of
-$\sum_{i \in c} (w_i^{vw,0.5} - w_i^{vw})$ by listing country $c$
-across rebalance years (pp). \emph{How constructed:} sum the
-firm-level active weights within each country in each year, then
-average. \emph{How to read:} the pattern is consistent with a
-substitution of carbon-heavy German industrials and Swiss/Danish
-cyclicals into UK-listed services; magnitudes stay $\le 40$\,bp,
-consistent with the tracking-error penalty
-of~\eqref{eq:vw05}.}\label{tab:country-tilt}
+\caption{Country-level active tilt of $P^{vw}(0.5)$, averaged across
+2013--2024}\label{tab:country-tilt}
 \small
 \begin{tabular}{l r l r}
 \toprule
@@ -759,6 +764,14 @@ Portugal (PT)       & $-0.06$ & Spain (ES)            & $+0.05$ \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\noindent{\small\textit{Note.} Mean of
+$\sum_{i \in c} (w_i^{vw,0.5} - w_i^{vw})$ by listing country $c$,
+averaged across rebalance years (percentage points). The pattern is
+consistent with a substitution of carbon-heavy German industrials
+and Swiss/Danish cyclicals into UK-listed services; magnitudes stay
+$\le 40$\,bp, consistent with the tracking-error penalty
+of~\eqref{eq:vw05}.\par}
 
 We note two caveats. First, listing country is not the same as
 country of operations: many UK-listed firms (e.g.\ Rio Tinto) have
@@ -941,17 +954,7 @@ well-converged constrained optimum.
 
 \begin{table}[H]
 \centering
-\caption{\textbf{Full year-by-year carbon metrics for the five
-portfolios.} \emph{What:} WACI and CF (\si{tCO_2/M\$}) of every
-portfolio in every rebalance year, plus the NZ budget target for
-reference. \emph{How constructed:}
-$\text{WACI}_Y=\sum_i w_{i,Y}\,CI_{i,Y}$ and
-$\text{CF}_Y=\sum_i w_{i,Y}\,E_{i,Y}/\text{MV}_{i,Y}$ using the
-weights from the year-$Y$ optimisation. \emph{How to read:} the
-achieved CF of $P^{vw}(0.5)$ matches its cap in every year to within
-$0.1$ \si{tCO_2/M\$}, and the achieved CF of $P^{vw}(NZ)$ matches the
-NZ budget exactly --- the empirical signature of a binding constraint
-at a well-converged KKT point.}
+\caption{Full year-by-year carbon metrics for the five portfolios}
 \label{tab:carbon-by-year}
 \scriptsize
 \setlength{\tabcolsep}{3.5pt}
@@ -977,6 +980,16 @@ $Y$ & WACI & CF & WACI & CF & WACI & CF & WACI & CF & WACI & CF & target \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\noindent{\small\textit{Note.} WACI and CF (\si{tCO_2/M\$}) of every
+portfolio in every rebalance year, plus the NZ budget target for
+reference. $\text{WACI}_Y=\sum_i w_{i,Y}\,CI_{i,Y}$ and
+$\text{CF}_Y=\sum_i w_{i,Y}\,E_{i,Y}/\text{MV}_{i,Y}$, using the
+weights from the year-$Y$ optimisation. The achieved CF of
+$P^{vw}(0.5)$ matches its cap in every year to within
+$0.1$ \si{tCO_2/M\$}, and the achieved CF of $P^{vw}(NZ)$ matches the
+NZ budget exactly --- the empirical signature of a binding constraint
+at a well-converged KKT point.\par}
 
 The MV portfolio's WACI spikes in 2014 (and to a lesser extent 2015--2017)
 are driven by a single Russian steel name, EVRAZ, which the minimum-variance
@@ -1004,16 +1017,7 @@ solution close to the cap-weighted benchmark.
 
 \begin{table}[H]
 \centering
-\caption{\textbf{Allocation diagnostics by rebalance year.}
-\emph{What:} universe size $|U_Y|$, largest single-name weight in
-each portfolio, and the binding carbon-cap level. Weight columns are
-in percent; cap columns in \si{tCO_2/M\$}.
-\emph{How constructed:} recorded at the end of each year's
-optimisation loop. \emph{How to read:} MV reaches 10--22\% single
-names; the VW-anchored constrained portfolios stay at 2.7--3.4\%,
-consistent with the tracking-error penalty pinning them close to the
-benchmark's concentration. The cap columns show the constraints
-tightening over time as the European index self-decarbonises.}
+\caption{Allocation diagnostics by rebalance year}
 \label{tab:alloc}
 \scriptsize
 \setlength{\tabcolsep}{4pt}
@@ -1042,6 +1046,16 @@ $P^{mv}(0.5)$ & $P^{vw}(0.5)$ & $P^{vw}(NZ)$ \\
 \end{tabular}
 \end{table}
 
+\noindent{\small\textit{Note.} Universe size $|U_Y|$, largest
+single-name weight in each portfolio (percent), and the binding
+carbon-cap level (\si{tCO_2/M\$}). Recorded at the end of each year's
+optimisation loop. The MV portfolios reach 10--22\% single-name
+weights, while the VW-anchored constrained portfolios stay at
+2.7--3.4\%, consistent with the tracking-error penalty pinning them
+close to the benchmark's concentration. The cap columns show the
+constraints tightening over time as the European index
+self-decarbonises.\par}
+
 \paragraph{Solver health.} Every constrained optimisation reached a
 feasible KKT point with the carbon constraint active to numerical
 precision. In SLSQP scaled units the in-sample tracking-error squared
@@ -1065,17 +1079,18 @@ unconstrained CF of the same year.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.78\linewidth]{part2_carbon_footprint_mv_family.png}
-\caption{\textbf{MV-family carbon metrics, stand-alone axis.}
-\emph{What:} WACI (right $y$) and CF (left $y$) of $P^{mv}$ and
-$P^{mv}(0.5)$, 2013--2024. \emph{How constructed:} formulas
-(\ref{eq:waci})--(\ref{eq:cf}), plotted on a dedicated scale because
-the MV-family numbers are 5--10$\times$ smaller than the VW family.
-\emph{How to read:} both curves are structurally low; the spikes on
-$P^{mv}$ in 2014--2017 are driven by a single high-CI name (EVRAZ);
-$P^{mv}(0.5)$ tames them mechanically via the annual recomputation
-of the cap.}
+\caption{MV-family carbon metrics on a stand-alone axis}
 \label{fig:mv-family-cf}
 \end{figure}
+
+\noindent{\small\textit{Note.} WACI (right $y$) and CF (left $y$) of
+$P^{mv}$ and $P^{mv}(0.5)$, 2013--2024, computed via
+equations~\eqref{eq:waci}--\eqref{eq:cf}. Plotted on a dedicated
+scale because the MV-family numbers are 5--10$\times$ smaller than
+the VW family. Both curves are structurally low; the spikes on
+$P^{mv}$ in 2014--2017 are driven by a single high-CI name (EVRAZ),
+which $P^{mv}(0.5)$ tames mechanically via the annual recomputation
+of the cap.\par}
 
 Figure~\ref{fig:excess} translates the VW-family results into excess
 returns vs.\ $P^{vw}$. The 50\%-cap portfolio drifts $\sim$5\%
@@ -1087,19 +1102,20 @@ high-carbon energy and materials names rebounded strongly from the
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.78\linewidth]{part2_excess_return_vs_vw.png}
-\caption{\textbf{Cumulative excess return of the carbon-constrained
-VW portfolios relative to $P^{vw}$.} \emph{What:} cumulative
-log-ratio $\ln(W^{p}_t / W^{vw}_t)$ for
-$p \in \{P^{vw}(0.5), P^{vw}(NZ)\}$, Jan 2014 -- Dec 2025.
-\emph{How constructed:} both return series are compounded
-independently and the ratio is plotted on a log scale, so that a
-$-1\%$ slope equates to $1\%$ pa underperformance. \emph{How to read:}
-both constrained portfolios stay within $\pm 2\%$ of the benchmark
-until 2020, then drift $\sim$4--5\% below over 2020--2022 (a period
-of strong recovery in high-carbon energy and materials names), and
-partially recover thereafter.}
+\caption{Cumulative excess return of the carbon-constrained VW
+portfolios relative to $P^{vw}$}
 \label{fig:excess}
 \end{figure}
+
+\noindent{\small\textit{Note.} Cumulative log-ratio
+$\ln(W^{p}_t / W^{vw}_t)$ for $p \in \{P^{vw}(0.5), P^{vw}(NZ)\}$,
+Jan 2014 -- Dec 2025. Both return series are compounded
+independently and the ratio is plotted on a log scale, so that a
+$-1\%$ slope equates to $1\%$ pa underperformance. Both constrained
+portfolios stay within $\pm 2\%$ of the benchmark until 2020, then
+drift $\sim$4--5\% below over 2020--2022 (a period of strong recovery
+in high-carbon energy and materials names) and partially recover
+thereafter.\par}
 
 % =======================================================================
 \section{Mathematical notes}\label{app:math}
