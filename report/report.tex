@@ -14,6 +14,7 @@
 \usepackage{hyperref}
 \usepackage{enumitem}
 \usepackage{array}
+\usepackage{float}
 \usepackage{siunitx}
 \sisetup{detect-all,group-separator={\,},output-decimal-marker={.}}
 \usepackage[round,authoryear]{natbib}
@@ -174,7 +175,7 @@ firms in 2013 to a peak of 600 in 2021, consistent with the gradual
 extension of Scope\,1$+$Scope\,2 coverage by Datastream's third-party
 providers.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \small
 \caption{\textbf{Investable universe size by rebalance year.}
@@ -236,7 +237,7 @@ Table~\ref{tab:part1-stats} reports the annualised statistics over
 January 2014 to December 2025, exactly as required by Section~2.2 of the
 project specification.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{\textbf{Part~I --- annualised statistics, Jan 2014 -- Dec 2025.}
 \emph{What:} risk-return summary of the two Part~I portfolios.
@@ -266,7 +267,7 @@ $P^{vw}_{oos}$         & 8.18       & 7.16       & 15.81      & 0.52            
 \end{tabular}
 \end{table}
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.82\linewidth]{part1_cumulative_returns.png}
 \caption{\textbf{Cumulative wealth of \$1 invested in $P^{mv}$ and
@@ -333,7 +334,7 @@ delivered by ten firms. The carbon distribution is right-skewed by design,
 which is the key reason why aggressive decarbonisation can be achieved by
 adjusting a handful of weights rather than rebuilding the whole portfolio.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{\textbf{Top 10 WACI contributors of $P^{vw}$ in 2013.}
 \emph{What:} the ten largest contributors to the value-weighted
@@ -370,7 +371,7 @@ Rank & Name & Weight (\%) & $CI$ (\si{tCO_2/M\$}) & Contribution \\
 
 \subsection{Carbon footprint of the unconstrained benchmarks}
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\linewidth]{part2_carbon_footprint_split.png}
 \caption{\textbf{Year-by-year carbon footprint (CF) and WACI, split
@@ -461,7 +462,7 @@ horizontal pairings (MV vs.\ MV with cap; VW vs.\ VW with cap) isolate
 the cost of a 50\% carbon reduction inside a given allocation
 philosophy.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{\textbf{Section 3.4 --- four-way performance comparison.}
 \emph{What:} risk-return summary of the two benchmark portfolios and
@@ -491,7 +492,7 @@ $P^{vw}_{oos}(0.5)$    & 7.85            & 6.78          & 15.98        & 0.49  
 \end{tabular}
 \end{table}
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\linewidth]{part2_cumulative_returns.png}
 \caption{\textbf{Section 3.4 cumulative returns.} \emph{What:} growth
@@ -543,7 +544,7 @@ to the value-weighted benchmark in mean-variance terms.
 The constraint at $Y_0=2013$ is therefore $\le 0.9\times 214.2 = 192.8$,
 and at $Y=2024$ it is $\le 0.9^{12}\times 214.2 = 60.5$.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\linewidth]{part2_carbon_footprint_vw_family.png}
 \caption{\textbf{Carbon trajectory of the value-weighted family with
@@ -567,7 +568,7 @@ geometric). A mechanical reason is that the NZ budget starts loose and
 tightens gradually, while the 50\% cap binds aggressively from year
 one (Figure~\ref{fig:part2-nz-cf}).
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{\textbf{Section 4.2 --- Net-Zero comparison.} \emph{What:}
 risk-return summary of $P^{vw}$, $P^{vw}(0.5)$ and $P^{vw}(NZ)$ over
@@ -614,7 +615,7 @@ Table~\ref{tab:robustness}. We focus on $P^{vw}(0.5)$ because it
 combines all the moving pieces: the cleaning filters, the sample
 covariance, and the carbon-constrained QP.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{\textbf{Robustness of $P^{vw}(0.5)$ to cleaning and covariance
 choices.} \emph{What:} annualised return, volatility and geometric
@@ -663,7 +664,7 @@ well above the universe median. The overweights, by contrast, are
 spread across low-carbon services and asset-management names (Man
 Group, Burberry, Ashmore in 2024).
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{\textbf{Active weights of $P^{vw}(0.5)$ vs.\ $P^{vw}$, 2013
 and 2024.} \emph{What:} the five largest over- and underweights in
@@ -732,7 +733,7 @@ Denmark are underweighted, largely reflecting individual large
 constituents (Heidelberg-CRH-Holcim's Swiss listings, Mærsk in
 Denmark).
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{\textbf{Country-level active tilt of $P^{vw}(0.5)$,
 averaged across 2013--2024.} \emph{What:} mean of
@@ -938,7 +939,7 @@ and the NZ glide path bind exactly in every year (the achieved CF equals
 the cap to the third decimal), which is the empirical signature of a
 well-converged constrained optimum.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{\textbf{Full year-by-year carbon metrics for the five
 portfolios.} \emph{What:} WACI and CF (\si{tCO_2/M\$}) of every
@@ -1001,7 +1002,7 @@ $P^{vw}(0.5)$ and $P^{vw}(NZ)$ retain VW-like concentration profiles
 penalty in problem~\eqref{eq:vw05} effectively pins the constrained
 solution close to the cap-weighted benchmark.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{\textbf{Allocation diagnostics by rebalance year.}
 \emph{What:} universe size $|U_Y|$, largest single-name weight in
@@ -1061,7 +1062,7 @@ on $P^{mv}$. The constrained $P^{mv}(0.5)$ tames these spikes by
 construction, since the cap is recomputed annually as half of the
 unconstrained CF of the same year.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.78\linewidth]{part2_carbon_footprint_mv_family.png}
 \caption{\textbf{MV-family carbon metrics, stand-alone axis.}
@@ -1083,7 +1084,7 @@ below. Most of the cumulative drag accrues during 2020--2022, when
 high-carbon energy and materials names rebounded strongly from the
 2020 trough.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.78\linewidth]{part2_excess_return_vs_vw.png}
 \caption{\textbf{Cumulative excess return of the carbon-constrained
