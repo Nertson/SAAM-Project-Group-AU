@@ -17,3 +17,10 @@ __pycache__/
 # Editor
 .vscode/
 .idea/
+
+# Local-only video / presentation prep (do not commit)
+presentation/
+*.pdf
+*.pptx
+*.key
+*.mp4
