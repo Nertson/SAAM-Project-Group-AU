@@ -29,7 +29,7 @@ def _load_panel_csv(path: Path) -> pd.DataFrame:
 
 
 def _extract_monthly_matrix(df: pd.DataFrame) -> pd.DataFrame:
-    parsed_dates = pd.to_datetime(pd.Index(df.columns), errors="coerce")
+    parsed_dates = pd.to_datetime(df.columns, errors="coerce", format="mixed")
     keep_mask = parsed_dates.notna()
     date_cols = pd.Index(df.columns)[keep_mask]
     out = df[date_cols].copy()

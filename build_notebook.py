@@ -55,6 +55,7 @@ they don't exist.
 CELLS.append(code(r"""
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
 from typing import Iterable, List, Tuple
 
@@ -62,6 +63,13 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
+
+# Silence harmless SLSQP probing warnings on near-singular Sigma; covariance
+# is already regularized below.
+warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*matmul.*")
+warnings.filterwarnings("ignore", category=UserWarning, message=".*non-interactive.*")
+warnings.filterwarnings("ignore", category=FutureWarning)
+np.seterr(divide="ignore", over="ignore", invalid="ignore")
 
 DATA_DIR = Path("data_raw")
 OUTPUT_PART1 = Path("outputs_part1")
@@ -255,7 +263,7 @@ return series itself.
 
 CELLS.append(code(r"""
 def _to_datetime_columns(df: pd.DataFrame) -> pd.DataFrame:
-    parsed = pd.to_datetime(pd.Index(df.columns), errors="coerce")
+    parsed = pd.to_datetime(df.columns, errors="coerce", format="mixed")
     keep = parsed.notna()
     out = df.iloc[:, np.where(keep)[0]].copy()
     out.columns = pd.DatetimeIndex(parsed[keep])
