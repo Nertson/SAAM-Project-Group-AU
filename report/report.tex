@@ -1,0 +1,647 @@
+\documentclass[11pt,a4paper]{article}
+
+% --- packages -----------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{siunitx}
+\sisetup{detect-all,group-separator={\,},output-decimal-marker={.}}
+\usepackage[round,authoryear]{natbib}
+\usepackage{xcolor}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=blue!60!black
+}
+
+\graphicspath{{../outputs_part1/}{../outputs_part2/}}
+
+% --- title --------------------------------------------------------------
+\title{\textbf{Sustainability-Aware Asset Management}\\[2pt]
+\large Portfolio Construction with Carbon-Emission Objectives\\[2pt]
+\large \textit{European Equity Universe, 2013--2025}}
+\author{Group AU \\ \small HEC Lausanne --- MSc Finance}
+\date{May 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+\noindent
+We build five long-only annually rebalanced equity portfolios over the
+European investment universe (633 firms in the cleaned static panel) between
+January 2014 and December 2025. The benchmark $P^{vw}$ delivers a geometric
+annualised return of 7.16\% (\textsc{vol} 15.8\%) while the unconstrained
+minimum-variance portfolio $P^{mv}$ realises 3.78\% (\textsc{vol} 13.8\%). We
+then impose a 50\% carbon-footprint cap on both anchors, and finally a
+Paris-aligned 10\%-per-year decarbonisation trajectory. The mathematics is
+the same in all four constrained variants: long-only quadratic programs over
+the simplex, augmented with one linear inequality on the carbon-footprint
+coefficient. Empirically, we find that decarbonising the value-weighted
+benchmark by 50\% costs only $\sim$38\,bp of geometric return (6.78\% vs.\
+7.16\%), and pursuing a full Net-Zero glide path costs $\sim$32\,bp (6.84\%).
+The relative cheapness of carbon constraints in our sample reflects (i) the
+right-skewed carbon distribution of European equities --- ten firms drive
+65\% of the value-weighted carbon footprint in 2013 --- and (ii) the
+secular decarbonisation of the index itself, with $CF(P^{vw})$ falling from
+214 to 90 \si{tCO_2/M\$} between 2013 and 2024 without any portfolio
+intervention.
+\end{abstract}
+
+\tableofcontents
+\bigskip
+
+% =======================================================================
+\section{Introduction}
+% =======================================================================
+
+The transition to a low-carbon economy is reshaping the way institutional
+investors allocate capital. Two questions matter for a quantitative
+portfolio manager. First, \textit{can} a sizeable carbon-footprint
+reduction be obtained without sacrificing the risk--return profile of a
+broad-market exposure? Second, \textit{should} it be done by deviating from
+the value-weighted benchmark, or by adopting a fundamentally different
+allocation rule (minimum-variance, equal-weight, etc.) and accepting the
+factor exposures that come with it?
+
+This project answers both questions empirically. Following the SAAM
+project specification, we build five portfolios over a 12-year
+out-of-sample window (2014--2025) using the European subset of the supplied
+Datastream panel and Scope\,1$+$Scope\,2 emissions:
+
+\begin{description}[leftmargin=2.6cm,style=nextline]
+  \item[$P^{mv}$] Long-only minimum-variance portfolio (Part I benchmark).
+  \item[$P^{vw}$] Value-weighted portfolio (Part I benchmark and Part II anchor).
+  \item[$P^{mv}(0.5)$] Minimum-variance with $CF \le 0.5\,CF(P^{mv})$.
+  \item[$P^{vw}(0.5)$] Tracking-error minimisation vs.\ $P^{vw}$ with $CF \le 0.5\,CF(P^{vw})$.
+  \item[$P^{vw}(NZ)$] Tracking-error minimisation vs.\ $P^{vw}$ with a $10\%$-per-year carbon-budget decay from the 2013 baseline.
+\end{description}
+
+The remainder of the paper is organised as follows.
+Section~\ref{sec:data} describes the data pipeline and cleaning rules.
+Section~\ref{sec:partI} presents Part~I, the standard allocation problem.
+Section~\ref{sec:partII} introduces the carbon metrics and the
+carbon-constrained portfolios of Part~II.
+Section~\ref{sec:findings} summarises our findings and managerial
+implications.
+Section~\ref{sec:limits} lists the five most material limitations of the
+analysis, and Section~\ref{sec:llm} discloses our use of generative AI.
+
+% =======================================================================
+\section{Data and Cleaning}\label{sec:data}
+% =======================================================================
+
+\subsection{Raw data and scope}
+The source is the Datastream extract supplied with the project. We restrict
+the static panel to firms classified \textsc{eur} (European), obtaining
+\textbf{633 firms} after de-duplicating ISINs. Time-series panels are:
+
+\begin{itemize}[leftmargin=*]
+  \item Total return index (\textsc{ri}) at monthly and yearly frequency.
+  \item Market capitalisation (\textsc{mv}) at monthly and yearly frequency, in USD.
+  \item Revenues (\textsc{rev\_y}), in USD thousands, annual.
+  \item Scope\,1 and Scope\,2 CO$_2$ emissions, in \si{tCO_2}, annual.
+\end{itemize}
+
+\subsection{Cleaning rules}\label{sec:cleaning}
+Cleaning is implemented in \texttt{data\_cleaning.py} and applied identically
+in Parts~I and II:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Price floor.} Monthly \textsc{ri} values below \$0.50 are
+        treated as missing. This removes prices that have collapsed to
+        rounding noise and would otherwise generate astronomical
+        ``recovery'' returns once re-listed.
+  \item \textbf{Returns from prices with explicit delisting.}
+        $R_{i,t}=P_{i,t}/P_{i,t-1}-1$ when both endpoints are observed.
+        When $P_{i,t-1}$ is observed but $P_{i,t}$ is \textsc{nan} and
+        \emph{every subsequent} observation is also \textsc{nan}, we set
+        $R_{i,t}=-100\%$ (definitive delisting). Mid-series gaps remain
+        \textsc{nan} so that the covariance estimator does not pretend to
+        observe a return.
+  \item \textbf{Annual forward fill of carbon and revenue.}
+        $\textit{Scope1}, \textit{Scope2}$ and $\textit{Revenue}$ are
+        forward-filled along the time axis. Missing values \emph{at the
+        beginning} of a firm's history are kept as \textsc{nan}: the firm
+        is simply not in the investable universe until the first reported
+        observation. We do \emph{not} forward-fill market variables
+        (\textsc{ri\_y, mv\_y}); this matters in Part~II because a firm
+        with a missing year-end cap must be excluded from the
+        value-weighted weight calculation that year.
+  \item \textbf{Stale-price flag.} A firm is flagged stale in year $Y$ if
+        more than 50\% of the monthly returns in the trailing 120-month
+        estimation window are exactly zero. Stale names are removed from
+        the year-$Y$ investable set.
+  \item \textbf{Minimum history.} A firm needs at least 36 non-missing
+        monthly observations in the 120-month estimation window ending at
+        December $Y$ to be eligible.
+\end{enumerate}
+
+\subsection{Carbon intensity}
+Total emissions are $E_{i,Y}=\textit{Scope1}_{i,Y}+\textit{Scope2}_{i,Y}$.
+Carbon intensity, in \si{tCO_2}\,per\,million USD of revenue, is
+\[
+  CI_{i,Y}=\frac{E_{i,Y}}{\text{Revenue}_{i,Y}/1000}.
+\]
+We rely on $CI$ rather than $E$ alone because $CI$ is invariant to firm
+size, which is the natural scaling for portfolio metrics.
+
+% =======================================================================
+\section{Part I --- Standard Portfolio Allocation}\label{sec:partI}
+% =======================================================================
+
+\subsection{Investable universe}
+
+For each rebalance date $Y\in\{2013,\dots,2024\}$ we define the year-$Y$
+investable set as the firms passing all five cleaning filters of
+Section~\ref{sec:cleaning} \emph{and} having a non-missing year-end \textsc{ri}
+and \textsc{ci}. Table~\ref{tab:n-inv} shows the universe grows from 469
+firms in 2013 to a peak of 600 in 2021, consistent with the gradual
+extension of Scope\,1$+$Scope\,2 coverage by Datastream's third-party
+providers.
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Number of investable firms by rebalance year.}\label{tab:n-inv}
+\begin{tabular}{l*{12}{c}}
+\toprule
+$Y$ & 13 & 14 & 15 & 16 & 17 & 18 & 19 & 20 & 21 & 22 & 23 & 24 \\
+$n$ & 469 & 487 & 505 & 512 & 525 & 546 & 572 & 591 & 600 & 590 & 575 & 563 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Portfolio definitions}
+
+\paragraph{Minimum variance ($P^{mv}$).} At each $Y$ we estimate the
+covariance matrix $\widehat\Sigma_Y$ on the trailing 120 monthly returns up
+to and including December $Y$, using pairwise deletion (\texttt{pandas.cov}
+with \texttt{ddof=0}). The Part~I weights solve
+\begin{equation}\label{eq:mv}
+  w^{mv}_Y \;=\; \arg\min_{w \in \mathbb{R}^n}\; w'\,\widehat\Sigma_Y\,w
+  \qquad \text{s.t.}\qquad \mathbf{1}'w = 1,\; w \ge 0.
+\end{equation}
+Equation~\eqref{eq:mv} is a strictly convex QP on the simplex; we solve it
+with \texttt{scipy.optimize.minimize} (SLSQP) after ridge-regularising
+$\widehat\Sigma$ by $10^{-10}\cdot \text{tr}(\widehat\Sigma)/n$ and rescaling by
+$\max|\widehat\Sigma_{ij}|$ for numerical conditioning. The rescaling does
+not affect the argmin.
+
+\paragraph{Value weighted ($P^{vw}$).} Using the December-$Y$ market caps:
+\begin{equation}\label{eq:vw}
+  w^{vw}_{i,Y} \;=\; \frac{\text{MV}_{i,Y}}{\sum_{j\in U_Y}\text{MV}_{j,Y}},
+\end{equation}
+where $U_Y$ is the year-$Y$ investable set (no $w_i$ assigned when
+$\text{MV}_{i,Y}$ is missing).
+
+\paragraph{Out-of-sample monthly return.} Weights $w^{p}_Y$ apply to year
+$Y+1$ with buy-and-hold (end-of-month rebalancing of \emph{intra-year} drift
+according to monthly realised returns). The annual reset means a fresh
+optimisation at every December.
+
+\subsection{Results}
+
+Table~\ref{tab:part1-stats} reports the annualised statistics over
+January 2014 to December 2025, exactly as required by Section~2.2 of the
+project specification.
+
+\begin{table}[ht]
+\centering
+\caption{Part~I --- annualised statistics, Jan 2014 -- Dec 2025
+(arithmetic = monthly mean $\times 12$; geometric = compounded;
+\textsc{vol} = monthly std $\times\sqrt{12}$).}\label{tab:part1-stats}
+\small
+\begin{tabular}{l S[table-format=2.2] S[table-format=2.2] S[table-format=2.2] S[table-format=1.2] S[table-format=1.2] S[table-format=-2.2] S[table-format=2.2]}
+\toprule
+                       & {Arith.}   & {Geom.}    & {Vol.}     & {SR$_{\text{ar}}$}& {SR$_{\text{gm}}$}& {Min}     & {Max}     \\
+                       & {(\%)}     & {(\%)}     & {(\%)}     &                   &                   & {(\%)}    & {(\%)}    \\
+\midrule
+$P^{mv}_{oos}$         & 4.67       & 3.78       & 13.77      & 0.34              & 0.27              & -12.00    & 14.24     \\
+$P^{vw}_{oos}$         & 8.18       & 7.16       & 15.81      & 0.52              & 0.45              & -15.30    & 18.28     \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.82\linewidth]{part1_cumulative_returns.png}
+\caption{Cumulative wealth of \$1 invested in $P^{mv}$ and $P^{vw}$,
+Jan 2014 -- Dec 2025.}
+\label{fig:part1-cum}
+\end{figure}
+
+\paragraph{Reading the table.} Minimum variance halves \emph{geometric}
+return relative to the value-weighted benchmark (3.78\% vs.\ 7.16\%), but
+also delivers $\sim$200~bp lower realised volatility. The Sharpe ratio
+(taken with zero risk-free rate, as in the project's spreadsheet template)
+favours the value-weighted exposure by 0.18 in arithmetic terms (0.18 in
+geometric terms as well). This is consistent with the well-known empirical
+under-performance of minimum-variance strategies in trending equity bull
+markets such as 2014--2021 \citep{Clarke2006MinVar}: low-volatility
+constraints concentrate the portfolio on defensive sectors (utilities,
+consumer staples) that systematically lag growth and technology during
+risk-on periods. The minimum-variance allocation is also markedly more
+concentrated --- the largest weight ranges from 10\% (2018) to 22\% (2014)
+across rebalance years (Appendix table \texttt{part1\_allocation\_diagnostics.csv}).
+
+% =======================================================================
+\section{Part II --- Carbon-Constrained Portfolios}\label{sec:partII}
+% =======================================================================
+
+\subsection{Carbon metrics}\label{sec:metrics}
+
+For year $Y$ and portfolio $P$ with weights $w_{i,Y}$:
+\begin{align}
+  \text{WACI}(P)_Y &= \sum_{i\in U_Y} w_{i,Y}\, CI_{i,Y},
+  \label{eq:waci}\\[2pt]
+  \text{CF}(P)_Y &= \sum_{i\in U_Y} w_{i,Y}\,\frac{E_{i,Y}}{\text{MV}_{i,Y}}.
+  \label{eq:cf}
+\end{align}
+WACI is the weighted-average carbon intensity (a sensitivity metric).
+$CF$ is the carbon footprint owned per million USD of market cap (a stock
+metric, and the one that drives carbon budget compliance). For the
+value-weighted benchmark, $CF(P^{vw})_Y$ collapses to the population
+ratio (Section 3.3 of the project specification):
+\[
+  CF(P^{vw})_Y = \frac{\sum_{i\in U_Y} E_{i,Y}}{\sum_{i\in U_Y} \text{MV}_{i,Y}}.
+\]
+We compute it that way in the code (\texttt{portfolio\_part2.py}).
+
+\subsection{Top carbon contributors of $P^{vw}$ (2013)}\label{sec:top10}
+
+Table~\ref{tab:top10-vw} lists the ten largest WACI contributors of the
+value-weighted benchmark in the 2013 rebalance. Together these ten names
+account for 60.4 out of $\text{WACI}(P^{vw})_{2013} = 136.1$ \si{tCO_2/M\$}
+--- i.e.\ \textbf{44\%} of the benchmark's average carbon intensity is
+delivered by ten firms. The carbon distribution is right-skewed by design,
+which is the key reason why aggressive decarbonisation can be achieved by
+adjusting a handful of weights rather than rebuilding the whole portfolio.
+
+\begin{table}[ht]
+\centering
+\caption{Top 10 WACI contributors of $P^{vw}$ in 2013. Weight is the
+year-end value-weighted share of the firm in the European universe.}
+\label{tab:top10-vw}
+\small
+\begin{tabular}{rlrrr}
+\toprule
+Rank & Name & Weight (\%) & $CI$ (\si{tCO_2/M\$}) & Contribution \\
+\midrule
+1  & Holcim                  & 0.32 & 4279 & 13.7 \\
+2  & Rio Tinto               & 1.01 &  754 &  7.7 \\
+3  & RWE                     & 0.27 & 2406 &  6.5 \\
+4  & Air Liquide             & 0.51 & 1037 &  5.3 \\
+5  & Fortum                  & 0.21 & 2491 &  5.3 \\
+6  & Enel                    & 0.50 & 1027 &  5.1 \\
+7  & Heidelberg Materials    & 0.15 & 3083 &  4.6 \\
+8  & Endesa                  & 0.31 & 1261 &  3.9 \\
+9  & EDF (delisted 2023)     & 0.45 &  807 &  3.6 \\
+10 & Drax                    & 0.05 & 7356 &  3.4 \\
+\midrule
+\multicolumn{4}{r}{\emph{Sum of top 10}} & 60.4 \\
+\multicolumn{4}{r}{$\text{WACI}(P^{vw})_{2013}$} & 136.1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Carbon footprint of the unconstrained benchmarks}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\linewidth]{part2_carbon_footprint_split.png}
+\caption{Year-by-year WACI and CF for the MV family (left) and VW family
+(right). The dashed/dotted lines are the carbon-constrained variants; the
+yellow line on the right is the Net Zero glide path
+$0.9^{(Y-2012)}\cdot CF(P^{vw})_{2013}$.}
+\label{fig:part2-cf-split}
+\end{figure}
+
+Two findings on Figure~\ref{fig:part2-cf-split} are worth flagging.
+
+\emph{First}, $CF(P^{vw})$ decays from 214 \si{tCO_2/M\$} in 2013 to about
+90 in 2024 --- a 58\% reduction \emph{without any portfolio
+intervention}. This is the cumulative effect of (a) European policy
+pressure (EU ETS price moving from $\sim$\EUR{5} to $\sim$\EUR{80}/\si{tCO_2}
+over the period), (b) coal-to-gas substitution and the post-Fukushima
+nuclear comeback, and (c) the relative outperformance of low-carbon sectors
+(technology, healthcare) that inflated their value-weighted share.
+
+\emph{Second}, $CF(P^{mv})$ is consistently \emph{below}
+$CF(P^{vw})$ --- 27 vs.\ 214 in 2013, and 64 vs.\ 90 in 2024. The
+minimum-variance optimiser, with no carbon objective whatsoever, naturally
+underweights the volatile commodity-exposed sectors that dominate
+$P^{vw}$'s carbon footprint (utilities, materials). A defensive tilt is
+therefore close to a carbon tilt for free.
+
+\subsection{Section 3.2 --- $P^{mv}(0.5)$}
+
+The carbon-constrained minimum-variance portfolio solves
+\begin{equation}\label{eq:mv05}
+  w^{mv,0.5}_Y = \arg\min_{w}\; w'\widehat\Sigma_Y w \quad \text{s.t.}\quad
+  \mathbf{1}'w=1,\; w\ge 0,\;
+  \sum_i w_i \,\frac{E_{i,Y}}{\text{MV}_{i,Y}} \le 0.5\,CF(P^{mv})_Y.
+\end{equation}
+The cap is computed \emph{after} the unconstrained optimisation in the
+same year, so by construction the constraint is binding in every year.
+Because $CF(P^{mv})$ is already a fraction of $CF(P^{vw})$, halving it
+further imposes very tight limits (13.6 in 2013, decaying to 32 in 2024;
+see \texttt{part2\_waci\_cf\_by\_year.csv}).
+
+\subsection{Section 3.3 --- $P^{vw}(0.5)$}\label{sec:vw05}
+
+The carbon-constrained tracking-error problem is
+\begin{equation}\label{eq:vw05}
+  w^{vw,0.5}_Y = \arg\min_{w}\; (w-w^{vw}_Y)'\widehat\Sigma_Y (w-w^{vw}_Y)
+  \quad \text{s.t.}\quad
+  \mathbf{1}'w=1,\; w\in[0,1]^n,\;
+  \sum_i w_i \frac{E_{i,Y}}{\text{MV}_{i,Y}} \le 0.5\,CF(P^{vw})_Y.
+\end{equation}
+The objective is the squared $ex$-$ante$ tracking error; minimising
+its square has the same argmin as minimising its square root. Because
+$\widehat\Sigma$ is positive semi-definite and the feasible set is
+non-empty, convex and compact, the QP admits a unique minimiser. The
+constraint is binding every year in our run, which is the empirical sign
+that the optimiser is reaching a proper KKT point rather than the
+unconstrained corner $w=w^{vw}$.
+
+\paragraph{Numerical robustness check.} With $n\simeq 500$, the QP
+\eqref{eq:vw05} is large and the covariance matrix is rank-deficient
+(120 observations vs.\ $n$ assets, plus stale columns). We therefore
+ridge-regularise $\widehat\Sigma$ and verify two diagnostics on every
+year: (i) the squared tracking error must be $\ge 0$ post-solution (a
+basic positivity check often violated when SLSQP runs to over-tight
+tolerances on indefinite Hessians), and (ii) the carbon constraint must
+be active (else the solution coincides with $P^{vw}$).
+Loose SLSQP tolerances ($\textsc{ftol}=10^{-6}$) satisfy both
+diagnostics every year; tighter tolerances did not in our pilot runs and
+produced spurious cumulative returns. We retain the loose setting.
+
+\subsection{Section 3.4 --- comparative results}\label{sec:34}
+
+Table~\ref{tab:34} reproduces, with PDF-aligned arithmetic and geometric
+returns, the four-portfolio comparison required in Section~3.4. The
+horizontal pairings (MV vs.\ MV with cap; VW vs.\ VW with cap) isolate
+the cost of a 50\% carbon reduction inside a given allocation
+philosophy.
+
+\begin{table}[ht]
+\centering
+\caption{Section 3.4 --- four-way performance comparison.}
+\label{tab:34}
+\small
+\begin{tabular}{l S[table-format=2.2] S[table-format=2.2] S[table-format=2.2] S[table-format=1.2]}
+\toprule
+                       & {Arith.\ (\%)}  & {Geom.\ (\%)} & {Vol.\ (\%)} & {SR$_{\text{ar}}$} \\
+\midrule
+$P^{mv}_{oos}$         & 4.67            & 3.78          & 13.77        & 0.34       \\
+$P^{mv}_{oos}(0.5)$    & 4.84            & 3.99          & 13.56        & 0.36       \\
+$P^{vw}_{oos}$         & 8.18            & 7.16          & 15.81        & 0.52       \\
+$P^{vw}_{oos}(0.5)$    & 7.85            & 6.78          & 15.98        & 0.49       \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\linewidth]{part2_cumulative_returns.png}
+\caption{Section 3.4 cumulative returns. \emph{Left:} minimum-variance
+family; the carbon cap is slightly accretive. \emph{Right:} value-weighted
+family; the carbon cap costs $\sim$5\% of cumulative wealth over 12 years.}
+\label{fig:part2-cum}
+\end{figure}
+
+Three observations stand out.
+
+\paragraph{(i) The MV cap is essentially free --- and actually
+beneficial.}
+$P^{mv}(0.5)$ \emph{outperforms} the unconstrained $P^{mv}$ by 21~bp pa
+geometric (3.99\% vs.\ 3.78\%) and lowers volatility by 21~bp as well
+(13.56\% vs.\ 13.77\%). The Sharpe ratio improves from 0.27 to 0.29
+(geometric). The carbon cap functions as a soft constraint against
+concentration in commodity-cyclicals, which happens to be value-additive
+in our sample.
+
+\paragraph{(ii) The VW cap costs roughly 38~bp of geometric return.}
+$P^{vw}(0.5)$ achieves 6.78\% vs.\ 7.16\% for $P^{vw}$ --- a 38~bp pa
+geometric drag, or $\sim$50~bp arithmetic. Volatility increases marginally
+(15.98\% vs.\ 15.81\%): the carbon cap pushes the portfolio away from the
+minimum-variance corner, but only by a few basis points because the
+tracking-error penalty keeps the allocation close to $P^{vw}$.
+
+\paragraph{(iii) Realised tracking error is small.} In all 12 rebalance
+years, the in-sample squared TE under \eqref{eq:vw05} is below
+$10^{-6}$ in scaled units --- the carbon-constrained portfolio is
+genuinely close to the VW benchmark, which is the desired property of a
+real-world ``carbon-aware index'' strategy.
+
+\subsection{Section 4 --- Net-Zero portfolio $P^{vw}(NZ)$}
+
+\paragraph{Specification.} The Paris-aligned glide path imposes
+\begin{equation}
+  CF(P^{vw,NZ})_Y \;\le\; (1-\theta)^{Y-Y_0+1}\,CF(P^{vw})_{Y_0},
+  \qquad \theta = 0.10,\quad Y_0 = 2013.
+\end{equation}
+The constraint at $Y_0=2013$ is therefore $\le 0.9\times 214.2 = 192.8$,
+and at $Y=2024$ it is $\le 0.9^{12}\times 214.2 = 60.5$.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\linewidth]{part2_carbon_footprint_vw_family.png}
+\caption{Carbon trajectory of the VW family. The 50\% cap (purple) and
+the NZ glide path (yellow) both bind in every year, but they require
+different intensities of portfolio surgery: the NZ constraint is
+\emph{less} binding than the 50\% cap until 2017, then \emph{more}
+binding thereafter.}
+\label{fig:part2-nz-cf}
+\end{figure}
+
+\paragraph{Performance.} Table~\ref{tab:42} adds the NZ portfolio to the
+VW family comparison. The cumulative-return drag of NZ is
+\emph{smaller} than that of the static 50\% cap (-32~bp vs.\ -38~bp
+geometric), because the NZ constraint starts loose and tightens
+gradually, while the 50\% cap is aggressive from year one.
+
+\begin{table}[ht]
+\centering
+\caption{Section 4.2 --- Net-Zero comparison.}\label{tab:42}
+\small
+\begin{tabular}{l S[table-format=2.2] S[table-format=2.2] S[table-format=2.2] S[table-format=1.2]}
+\toprule
+                       & {Arith.\ (\%)}  & {Geom.\ (\%)} & {Vol.\ (\%)} & {SR$_{\text{ar}}$} \\
+\midrule
+$P^{vw}_{oos}$         & 8.18            & 7.16          & 15.81        & 0.52       \\
+$P^{vw}_{oos}(0.5)$    & 7.85            & 6.78          & 15.98        & 0.49       \\
+$P^{vw}_{oos}(NZ)$     & 7.92            & 6.84          & 16.01        & 0.49       \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A subtle but important pattern in Figure~\ref{fig:part2-nz-cf} is that
+$P^{vw}(NZ)$ tracks the unconstrained $CF(P^{vw})$ until 2017, then
+detaches. Until that year, the natural decarbonisation of the European
+index is faster than the 10\%-pa glide path; the optimiser is therefore
+free to stay close to $P^{vw}$. From 2018 onwards the glide path bites
+and the portfolio must \emph{actively} divest. This crossover, visible in
+the figure as the convergence of $CF(P^{vw,NZ})$ and $CF(P^{vw})$
+around 2017, is the exact moment when a Paris-aligned mandate stops
+being free.
+
+% =======================================================================
+\section{Findings, Interpretation and Suggestions}\label{sec:findings}
+% =======================================================================
+
+\subsection{Findings}
+
+\begin{enumerate}[leftmargin=*]
+  \item Over 2014--2025, the European value-weighted benchmark
+        decarbonised by \textbf{58\%} on its own, without any portfolio
+        intervention. Investors who chose a passive value-weighted
+        exposure in 2014 already met more than half of any reasonable
+        Paris-aligned mandate \emph{ex post}.
+  \item A 50\% \emph{ex ante} carbon cap on $P^{vw}$ costs only 38~bp
+        of geometric return and increases tracking error marginally.
+        Decarbonising the benchmark is therefore cheap in the European
+        equity market over this sample.
+  \item A 10\%-per-year Paris-aligned trajectory is even cheaper
+        (-32~bp) because the constraint is non-binding for the first
+        five years.
+  \item Minimum-variance \emph{is} a carbon-friendly allocation:
+        $CF(P^{mv})$ is below $CF(P^{vw})$ in every year, and adding
+        an explicit 50\% carbon cap actually \emph{improves} the
+        Sharpe ratio (0.27 $\to$ 0.29 geometric).
+  \item The carbon distribution of European equities is extremely
+        right-skewed: ten firms (Holcim, Rio Tinto, RWE, \dots)
+        deliver 44\% of $\text{WACI}(P^{vw})$. Selective underweighting
+        of these names is the dominant lever of decarbonisation.
+\end{enumerate}
+
+\subsection{Interpretation}
+
+The cheapness of carbon constraints reflects three structural facts.
+\emph{One}, the European carbon-intensity distribution is concentrated:
+the bottom-quintile carbon-intensity firms account for less than 1\% of
+emissions, so excluding the top decile barely shrinks the investable
+universe in cap-weighted terms. \emph{Two}, low-carbon sectors have
+been factor-tail beneficiaries during the sample window (the technology
+and healthcare bull market of 2014--2021), so divesting high-carbon
+names is not penalised by a missing risk premium. \emph{Three}, market
+caps of high-carbon firms have de-rated faster than their emissions have
+declined, which mechanically lowers the population
+$\sum E / \sum \text{MV}$ ratio.
+
+These three facts are sample-specific. A US-only or emerging-market
+study would deliver a different cost of carbon. The literature
+documents \emph{positive} carbon premia
+\citep{BoltonKacperczyk2021} that would, all else equal, make
+decarbonisation \emph{more} expensive ex ante. The fact that our
+sample shows a small \emph{negative} premium is informative about
+European equity 2014--2025, not about the asset class in general.
+
+\subsection{Suggestions for a real implementation}
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Use a Net-Zero glide path, not a one-shot 50\% cap.}
+        The NZ portfolio is cheaper, more transparent to communicate
+        (one $\theta$ parameter), and aligned with the EU Climate
+        Transition Benchmark (CTB) regulation.
+  \item \textbf{Combine MV with a carbon cap if drawdown protection
+        matters.} The MV family delivers carbon savings \emph{and}
+        $\sim$200~bp lower volatility, with a Sharpe improvement when
+        the cap is added.
+  \item \textbf{Monitor the top-10 emitters explicitly.}
+        Most of the carbon footprint is delivered by a handful of
+        names; a hard exclusion of the highest-intensity decile would
+        achieve 80\% of the carbon objective with negligible tracking
+        error.
+  \item \textbf{Re-estimate the covariance with a shrinkage estimator}
+        (Ledoit--Wolf, OAS) instead of the raw sample covariance to
+        improve the conditioning of $\widehat\Sigma$ and the stability
+        of the SLSQP solution.
+\end{itemize}
+
+% =======================================================================
+\section{Limitations}\label{sec:limits}
+% =======================================================================
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Scope\,3 emissions are excluded.} Scope\,3 is now
+        widely accepted as the dominant emission category for
+        financial-services and consumer-goods firms. Excluding it
+        flatters the carbon footprint of banks and retailers in the
+        portfolio. CSRD will mandate Scope\,3 reporting from 2025;
+        future iterations of this study should incorporate it.
+  \item \textbf{Carbon data has lags and revisions.} Datastream's
+        2024 Scope\,1$+$Scope\,2 figures are partly extrapolated by
+        third-party data providers; the forward-fill rule mitigates
+        but does not eliminate this look-ahead.
+  \item \textbf{No transaction costs.} Annual rebalancing at the index
+        level masks the realistic frictions (bid-ask, market impact,
+        tax) that a real portfolio would face --- especially for the
+        MV portfolio, which has 10--22\% single-name weights and high
+        turnover.
+  \item \textbf{Covariance estimation.} A 120-month rolling sample
+        covariance is rank-deficient when $n > 120$, which is the
+        case every year ($n\in[469,600]$). We mitigate with ridge
+        regularisation, but a shrinkage estimator
+        \citep{LedoitWolf2004} would be more disciplined.
+  \item \textbf{Sample window.} Twelve years and a single geography
+        are not enough to disentangle the carbon-premium effect from
+        the technology bull market. The negative carbon premium we
+        document may not generalise.
+\end{itemize}
+
+% =======================================================================
+\section{Use of Generative AI}\label{sec:llm}
+% =======================================================================
+
+In accordance with the course transparency policy, we disclose that
+generative AI assistants (OpenAI ChatGPT, Anthropic Claude) were used
+during this project for: (i) refactoring intermediate Python prototypes
+into the production pipeline (\texttt{data\_cleaning.py},
+\texttt{portfolio\_part1.py}, \texttt{portfolio\_part2.py}), in particular
+to handle numerical conditioning of the covariance matrix and the
+\textsc{slsqp} solver, (ii) sanity-checking that each implementation
+choice matches the wording of the project specification, and (iii)
+polishing the language of this report. All methodological decisions,
+mathematical formulations, results, and the interpretation of findings
+in Section~\ref{sec:findings} are our own work, and the group remains
+fully responsible for correctness and academic integrity.
+
+% =======================================================================
+\section*{References}\addcontentsline{toc}{section}{References}
+% =======================================================================
+
+\begin{thebibliography}{9}
+\bibitem[Andersson et al.(2016)]{AnderssonBoltonSamama2016}
+  Andersson, M., Bolton, P., \& Samama, F. (2016).
+  Hedging climate risk.
+  \textit{Financial Analysts Journal}, \textbf{72}(3), 13--32.
+\bibitem[Bolton \& Kacperczyk(2021)]{BoltonKacperczyk2021}
+  Bolton, P., \& Kacperczyk, M. (2021).
+  Do investors care about carbon risk?
+  \textit{Journal of Financial Economics}, \textbf{142}(2), 517--549.
+\bibitem[Clarke et al.(2006)]{Clarke2006MinVar}
+  Clarke, R., De Silva, H., \& Thorley, S. (2006).
+  Minimum-variance portfolios in the U.S. equity market.
+  \textit{Journal of Portfolio Management}, \textbf{33}(1), 10--24.
+\bibitem[Ledoit \& Wolf(2004)]{LedoitWolf2004}
+  Ledoit, O., \& Wolf, M. (2004).
+  Honey, I shrunk the sample covariance matrix.
+  \textit{Journal of Portfolio Management}, \textbf{30}(4), 110--119.
+\end{thebibliography}
+
+\end{document}

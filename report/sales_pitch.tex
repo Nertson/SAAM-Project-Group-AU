@@ -1,0 +1,115 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.0cm]{geometry}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\definecolor{accent}{HTML}{1F5F8B}
+\definecolor{lightbg}{HTML}{F2F4F7}
+
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries\color{accent}AU Carbon-Aware European Equity Strategy}\\[2pt]
+{\small Group AU --- HEC Lausanne --- May 2026}
+\end{center}
+
+\vspace{4pt}
+
+\begin{tcolorbox}[colback=lightbg,colframe=accent,boxrule=0.6pt,arc=2pt,
+  left=8pt,right=8pt,top=4pt,bottom=4pt]
+\textbf{The pitch in one line.} We can match the European value-weighted
+benchmark within 38\,bp of annualised geometric return while halving its
+carbon footprint --- or run a full Paris-aligned Net-Zero glide path for
+even less (-32\,bp).
+\end{tcolorbox}
+
+\textbf{What we built.}
+A long-only annually rebalanced equity strategy on the
+European Datastream universe (633 firms, 469--600 investable per year).
+Five portfolios run side by side from January 2014 to December 2025:
+the textbook minimum-variance and value-weighted benchmarks, plus three
+carbon-constrained variants ($P^{mv}(0.5)$, $P^{vw}(0.5)$ and the
+Paris-aligned $P^{vw}(NZ)$, decarbonising 10\% per year from the 2013
+baseline).
+
+\textbf{Headline numbers (Jan 2014 -- Dec 2025).}
+
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+Portfolio              & Geom.\ Return & Vol. & Sharpe & $\Delta$ Return vs.\ $P^{vw}$ & Carbon vs.\ $P^{vw}$ \\
+\midrule
+$P^{vw}$ (benchmark)   & 7.16\%        & 15.8\%& 0.45   & ---                            & ---                         \\
+$P^{vw}(0.5)$          & 6.78\%        & 16.0\%& 0.42   & $-38$\,bp                     & $-50\%$ (by design)        \\
+$P^{vw}(NZ)$           & 6.84\%        & 16.0\%& 0.43   & $-32$\,bp                     & $-72\%$ by 2024 (glide)     \\
+$P^{mv}$               & 3.78\%        & 13.8\%& 0.27   & $-338$\,bp                    & $-87\%$                     \\
+$P^{mv}(0.5)$          & 3.99\%        & 13.6\%& 0.29   & $-317$\,bp                    & $-94\%$                     \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Three structural reasons it works.}
+
+\begin{enumerate}[leftmargin=1.4em,nosep]
+  \item \emph{Right-skewed carbon distribution.} Ten European firms
+        (Holcim, Rio Tinto, RWE, Air Liquide, Fortum, Enel, Heidelberg
+        Materials, Endesa, EDF, Drax) deliver 44\% of the benchmark's
+        weighted-average carbon intensity in 2013. Selectively
+        underweighting them is enough to halve the carbon footprint
+        with negligible tracking error.
+  \item \emph{Self-decarbonisation tailwind.} The European value-weighted
+        carbon footprint fell from 214 to 90 \mbox{tCO$_2$/M\$} between
+        2013 and 2024 without any portfolio intervention (EU ETS pricing,
+        coal-to-gas substitution, technology bull market). A glide-path
+        strategy gets the first five years almost for free.
+  \item \emph{Carbon premium is small and negative in our sample.}
+        Low-carbon European stocks marginally outperformed during
+        2014--2025, so divesting high-carbon names does not forfeit a
+        risk premium. We do \emph{not} extrapolate this conclusion to
+        other geographies or sample windows.
+\end{enumerate}
+
+\textbf{Who this is for.}
+Institutional investors with European equity mandates and a Paris-aligned
+or Article-9 commitment (pension funds, insurance general accounts,
+sustainability-oriented asset managers). The strategy mirrors the spirit
+of the EU Climate Transition Benchmark while offering a 50\% one-shot
+variant for clients with stricter immediate carbon targets.
+
+\textbf{What we are \emph{not} selling.}
+This is a beta product, not alpha. Tracking error vs.\ $P^{vw}$ is
+intentionally small. Outperformance over the value-weighted benchmark
+should not be the headline KPI --- carbon savings per unit of tracking
+error should.
+
+\textbf{Next steps.}
+(1) Plug in a Ledoit--Wolf shrinkage covariance for production stability.
+(2) Add Scope\,3 once CSRD reporting becomes universal in 2025--2026.
+(3) Test the strategy on the US (Russell 1000) and Emerging Markets
+universes, where the carbon premium is empirically larger and the cost
+of decarbonisation likely higher.
+
+\vspace{2pt}
+\hrule
+\vspace{2pt}
+\small
+\textit{Methodology and back-test reproducibility: see
+\texttt{report/report.tex} and \texttt{SAAM\_Project\_Group\_AU.ipynb}
+in the project repository.}
+
+\end{document}
