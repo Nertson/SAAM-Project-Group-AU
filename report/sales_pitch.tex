@@ -1,126 +1,108 @@
-\documentclass[11pt,a4paper]{article}
-
+\documentclass[9.5pt,a4paper]{article}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{lmodern}
-\usepackage[a4paper,margin=2.0cm]{geometry}
-\usepackage{microtype}
-\usepackage{xcolor}
-\usepackage{tcolorbox}
-\tcbuselibrary{skins}
-\usepackage{enumitem}
+\usepackage[top=1.8cm, bottom=0.8cm, left=2.2cm, right=2.2cm]{geometry}
 \usepackage{booktabs}
-\usepackage{graphicx}
-\usepackage{hyperref}
-
+\usepackage{amsmath}
+\usepackage{parskip}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\small SAAM Project --- Group AU}
+\lhead{\small Sales Pitch}
+\rfoot{\small\thepage}
+\setlength{\parskip}{3.5pt}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{4pt}
-
-\definecolor{accent}{HTML}{1F5F8B}
-\definecolor{lightbg}{HTML}{F2F4F7}
-
-\pagestyle{empty}
-
+\titleformat{\subsection}{\bfseries\normalsize}{}{0pt}{}[{\vspace{2pt}\hrule\vspace{4pt}}]
+\titlespacing{\subsection}{0pt}{8pt}{0pt}
 \begin{document}
-
 \begin{center}
-{\Large\bfseries\color{accent}AU Carbon-Aware European Equity Strategy}\\[2pt]
-{\small Group AU --- HEC Lausanne --- May 2026}
+    {\LARGE \textbf{Cut Carbon. Keep Returns.}}\\[0.15cm]
+    {\large A Practical Decarbonisation Strategy for European Equities}\\[0.15cm]
+    {\normalsize Group AU --- HEC Lausanne --- May 2026}
 \end{center}
+\vspace{0.08cm}
+\rule{\linewidth}{1pt}
+\vspace{-0.2cm}
 
-\vspace{4pt}
+\subsection{The Challenge}
+Pension funds and institutional investors face growing pressure to reduce their carbon
+footprint --- from regulators, from clients, and from the Paris Agreement. The natural
+fear is that going green means giving up returns. Our results, based on 12 years of
+real data, tell a more encouraging story.
 
-\begin{tcolorbox}[colback=lightbg,colframe=accent,boxrule=0.6pt,arc=2pt,
-  left=8pt,right=8pt,top=4pt,bottom=4pt]
-\textbf{The pitch in one line.} We can match the European value-weighted
-benchmark within 38\,bp of annualised geometric return while halving its
-carbon footprint --- or run a full Paris-aligned Net-Zero glide path for
-even less (-32\,bp).
-\end{tcolorbox}
+\subsection{Two Strategies, One Clear Goal}
+We tested two long-only portfolios on 633 European equities, rebalanced every year
+from 2014 to 2025. Both target a 50\%+ carbon reduction relative to the market
+benchmark, with no derivatives, no complex instruments:
 
-\textbf{What we built.}
-A long-only annually rebalanced equity strategy on the
-European Datastream universe (633 firms, 469--600 investable per year).
-Five portfolios run side by side from January 2014 to December 2025:
-the textbook minimum-variance and value-weighted benchmarks, plus three
-carbon-constrained variants ($P^{mv}(0.5)$, $P^{vw}(0.5)$ and the
-Paris-aligned $P^{vw}(NZ)$, decarbonising 10\% per year from the 2013
-baseline).
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=3pt]
+    \item \textbf{Static 50\% cap} ($P^{vw}(0.5)$): halves the carbon footprint of
+    the benchmark from day one, while staying as close as possible to market returns.
+    \item \textbf{Net-Zero glide path} ($P^{vw}(NZ)$): reduces carbon by 10\% every
+    year, fully aligned with the EU Climate Transition Benchmark regulation.
+\end{itemize}
 
-\textbf{Headline numbers (Jan 2014 -- Dec 2025).}
-Geometric return and volatility are computed on the monthly
-out-of-sample series; the Sharpe ratio uses a zero risk-free rate;
-$\Delta$ vs.\ $P^{vw}$ is the geometric-return gap; ``Carbon vs.\
-$P^{vw}$'' is the average CF reduction over the horizon.
-
-\begin{center}
-\begin{tabular}{lccccc}
+\subsection{The Numbers}
+\begin{table}[h]
+\vspace{-2pt}
+\centering
+\begin{tabular}{lccc}
 \toprule
-Portfolio              & Geom.\ Return & Vol. & Sharpe & $\Delta$ Return vs.\ $P^{vw}$ & Carbon vs.\ $P^{vw}$ \\
+Strategy & Geometric Return & vs.\ Benchmark & Carbon Reduction \\
 \midrule
-$P^{vw}$ (benchmark)   & 7.16\%        & 15.8\%& 0.45   & ---                            & ---                         \\
-$P^{vw}(0.5)$          & 6.78\%        & 16.0\%& 0.42   & $-38$\,bp                     & $-50\%$ (by design)        \\
-$P^{vw}(NZ)$           & 6.84\%        & 16.0\%& 0.43   & $-32$\,bp                     & $-72\%$ by 2024 (glide)     \\
-$P^{mv}$               & 3.78\%        & 13.8\%& 0.27   & $-338$\,bp                    & $-87\%$                     \\
-$P^{mv}(0.5)$          & 3.99\%        & 13.6\%& 0.29   & $-317$\,bp                    & $-94\%$                     \\
+Benchmark $P^{vw}$       & 7.16\% & ---      & ---             \\
+50\% Cap $P^{vw}(0.5)$   & 6.78\% & $-$38 bp & $-$50\%         \\
+Net-Zero $P^{vw}(NZ)$    & 6.84\% & $-$32 bp & $-$72\% by 2024 \\
 \bottomrule
 \end{tabular}
-
-\smallskip
-\emph{Read me:} the VW-anchored carbon variants ($-38$ and $-32$\,bp pa)
-deliver a 50--72\% carbon reduction at a small return cost; the
-MV-anchored variants achieve $>$85\% carbon reduction but underperform
-the benchmark by $\sim$3.2\%\,pa, reflecting the cost of an entirely
-different allocation philosophy --- not the cost of carbon.
+\end{table}
+\vspace{-8pt}
+\begin{center}
+{\small\textit{Out-of-sample, January 2014 -- December 2025. Zero risk-free rate.}}
 \end{center}
 
-\textbf{Three structural reasons it works.}
+A 72\% carbon reduction for a cost of just 32 bp per year. To put that in perspective:
+on a \$100M portfolio, that is \$320,000 per year --- a price most clients consider
+reasonable for full EU CTB alignment.
 
-\begin{enumerate}[leftmargin=1.4em,nosep]
-  \item \emph{Right-skewed carbon distribution.} Ten European firms
-        (Holcim, Rio Tinto, RWE, Air Liquide, Fortum, Enel, Heidelberg
-        Materials, Endesa, EDF, Drax) deliver 44\% of the benchmark's
-        weighted-average carbon intensity in 2013. Selectively
-        underweighting them is enough to halve the carbon footprint
-        with negligible tracking error.
-  \item \emph{Self-decarbonisation tailwind.} The European value-weighted
-        carbon footprint fell from 214 to 90 \mbox{tCO$_2$/M\$} between
-        2013 and 2024 without any portfolio intervention (EU ETS pricing,
-        coal-to-gas substitution, technology bull market). A glide-path
-        strategy gets the first five years almost for free.
-  \item \emph{Carbon premium is small and negative in our sample.}
-        Low-carbon European stocks marginally outperformed during
-        2014--2025, so divesting high-carbon names does not forfeit a
-        risk premium. We do \emph{not} extrapolate this conclusion to
-        other geographies or sample windows.
-\end{enumerate}
+\subsection{Why It Works}
+The carbon footprint of a portfolio is not spread evenly. Just 10 firms --- including
+Holcim, RWE, Rio Tinto and Enel --- account for 44\% of the benchmark's total carbon
+intensity. By trimming these positions and reallocating to low-carbon names, the
+optimiser achieves large carbon reductions with very small deviations from the benchmark.
+The European market also helped: under rising EU carbon pricing, the broad index
+self-decarbonised by 58\% over the period, which kept the financial cost of the
+Net-Zero constraint low --- especially in the early years.
 
-\textbf{Who this is for.}
-Institutional investors with European equity mandates and a Paris-aligned
-or Article-9 commitment (pension funds, insurance general accounts,
-sustainability-oriented asset managers). The strategy mirrors the spirit
-of the EU Climate Transition Benchmark while offering a 50\% one-shot
-variant for clients with stricter immediate carbon targets.
+\subsection{Risks We Take Seriously}
+We do not hide the limits of this analysis:
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=3pt]
+    \item \textbf{Sample dependency.} These results are specific to European equities
+    over 2014--2025, a period of strong regulatory tailwinds and tech-led growth.
+    The same strategy in a different market or a different decade could show a higher
+    financial cost.
+    \item \textbf{Scope 3 not included.} We only use Scope 1 and Scope 2 emissions.
+    Scope 3 (supply chain) is the largest source for many sectors and is not yet
+    fully covered by data providers.
+    \item \textbf{Transaction costs.} Annual rebalancing generates turnover. Real
+    implementation costs must be assessed before going live.
+\end{itemize}
 
-\textbf{What we are \emph{not} selling.}
-This is a beta product, not alpha. Tracking error vs.\ $P^{vw}$ is
-intentionally small. Outperformance over the value-weighted benchmark
-should not be the headline KPI --- carbon savings per unit of tracking
-error should.
+\subsection{Our Recommendation}
+For a client seeking immediate impact, the \textbf{static 50\% cap} delivers a
+verified carbon reduction from year one at minimal cost. For a client seeking
+long-term regulatory alignment, the \textbf{Net-Zero glide path} is the strongest
+choice: it ends the horizon with 72\% less carbon than the benchmark, at a cost
+of 32 bp per year. Both strategies are transparent, rules-based, and ready to implement.
 
-\textbf{Next steps.}
-(1) Plug in a Ledoit--Wolf shrinkage covariance for production stability.
-(2) Add Scope\,3 once CSRD reporting becomes universal in 2025--2026.
-(3) Test the strategy on the US (Russell 1000) and Emerging Markets
-universes, where the carbon premium is empirically larger and the cost
-of decarbonisation likely higher.
-
-\vspace{2pt}
-\hrule
-\vspace{2pt}
-\small
-\textit{Methodology and back-test reproducibility: see
-\texttt{report/report.tex} and \texttt{SAAM\_Project\_Group\_AU.ipynb}
-in the project repository.}
-
+\vspace{0.3cm}
+\rule{\linewidth}{1pt}
+\begin{center}
+{\small Arthur Pillet \quad Nathan Heimendinger Dreyfus \quad Marc Muller \quad Evan Dejean}\\
+{\small HEC Lausanne --- Sustainability Aware Asset Management --- May 2026}
+\end{center}
 \end{document}
