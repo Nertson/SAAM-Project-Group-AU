@@ -1,122 +1,102 @@
 \documentclass[10pt,a4paper]{article}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage[top=1.8cm, bottom=0.8cm, left=2.2cm, right=2.2cm]{geometry}
+\usepackage[top=1.5cm, bottom=1.0cm, left=1.8cm, right=1.8cm]{geometry}
 \usepackage{booktabs}
 \usepackage{amsmath}
 \usepackage{parskip}
 \usepackage{microtype}
 \usepackage{enumitem}
-\usepackage{fancyhdr}
 \usepackage{titlesec}
-\pagestyle{fancy}
-\fancyhf{}
-\rhead{\small SAAM Project --- Group AU}
-\lhead{\small Sales Pitch}
-\rfoot{\small\thepage}
-\setlength{\parskip}{3.5pt}
+\usepackage{xcolor}
+\setlength{\parskip}{3pt}
 \setlength{\parindent}{0pt}
-\titleformat{\subsection}{\bfseries\normalsize}{}{0pt}{}[{\vspace{2pt}\hrule\vspace{4pt}}]
-\titlespacing{\subsection}{0pt}{8pt}{0pt}
+\titleformat{\subsection}{\bfseries\normalsize}{}{0pt}{}[{\vspace{1pt}\hrule\vspace{2pt}}]
+\titlespacing{\subsection}{0pt}{6pt}{0pt}
+\pagestyle{empty}
 \begin{document}
-\begin{center}
-    {\LARGE \textbf{Decarbonise European Equities Without Giving Up the
-    Benchmark}}\\[0.15cm]
-    {\large A Practical, Rules-Based Decarbonisation Framework}\\[0.15cm]
-    {\normalsize Group AU --- HEC Lausanne --- May 2026}
-\end{center}
-\vspace{0.08cm}
-\rule{\linewidth}{1pt}
-\vspace{-0.2cm}
 
-Institutional investors face a clear challenge: reduce portfolio carbon
-exposure while preserving the financial profile of a broad European equity
-allocation. Our results suggest this trade-off can be managed more efficiently
-than many investors expect. Using 12 years of out-of-sample data on 633
-European equities, we find that a rules-based decarbonisation strategy can
-deliver large carbon reductions at a limited observed performance cost.
+\begin{center}
+    {\LARGE \textbf{Decarbonise European Equities Without Giving Up the Benchmark}}\\[0.10cm]
+    {\large A Practical, Rules-Based Decarbonisation Framework}
+\end{center}
+\rule{\linewidth}{1pt}
+\vspace{-0.25cm}
+
+Institutional investors face a clear challenge: reduce carbon exposure
+without materially weakening the financial profile of a broad European
+equity allocation. Using 12 years of out-of-sample data on 633 European
+equities, we find that a rules-based decarbonisation strategy can deliver
+large carbon reductions at a limited observed return cost.
 
 \subsection{Two Practical Portfolio Solutions}
-We tested two long-only, annually rebalanced strategies relative to the
-European value-weighted benchmark:
-
-\begin{enumerate}[leftmargin=*, itemsep=2pt, topsep=3pt]
-    \item \textbf{50\% Carbon Cap} ($P^{vw}(0.5)$): a portfolio designed to
-    stay as close as possible to the benchmark while cutting its carbon
-    footprint by 50\% each year.
-    \item \textbf{Net-Zero Glide Path} ($P^{vw}(NZ)$): a Paris-aligned
-    strategy that reduces the carbon budget by 10\% per year from the 2013
-    baseline, in the spirit of the EU Climate Transition Benchmark framework.
+\begin{enumerate}[leftmargin=*, itemsep=0pt, topsep=2pt]
+    \item \textbf{50\% Carbon Cap} ($P^{vw}(0.5)$): stays close to the
+    European value-weighted benchmark while halving the benchmark's carbon
+    footprint each year.
+    \item \textbf{Net-Zero Glide Path} ($P^{vw}(NZ)$): reduces the carbon
+    budget by 10\% per year from the 2013 baseline, aligned with the EU
+    Climate Transition Benchmark.
 \end{enumerate}
 
-\subsection{Headline Results}
-\begin{table}[h]
-\vspace{-2pt}
-\centering
+\subsection{Headline Results --- Out-of-Sample, 2014--2025}
+\begin{center}
+\renewcommand{\arraystretch}{1.15}
+\colorbox{black!5}{%
 \begin{tabular}{lccc}
 \toprule
-Strategy & Geometric Return & Return Gap vs.\ Benchmark & Carbon Reduction \\
+\textbf{Strategy} & \textbf{Geometric Return} & \textbf{Gap vs.\ Benchmark} & \textbf{Carbon Reduction} \\
 \midrule
-Benchmark $P^{vw}$       & 7.16\% & ---      & ---             \\
-50\% Cap $P^{vw}(0.5)$   & 6.78\% & $-$38 bp & $-$50\%         \\
-Net-Zero $P^{vw}(NZ)$    & 6.84\% & $-$32 bp & $-$72\% by 2024 \\
+Benchmark $P^{vw}$       & 7.16\%             & ---                 & ---                      \\
+50\% Cap $P^{vw}(0.5)$   & 6.78\%             & $-$38 bp            & $-$50\%                  \\
+Net-Zero $P^{vw}(NZ)$    & \textbf{6.84\%}    & \textbf{$-$32 bp}   & \textbf{$-$72\% by 2024} \\
 \bottomrule
-\end{tabular}
-\end{table}
-\vspace{-8pt}
+\end{tabular}}
+\end{center}
+\vspace{-2pt}
 \begin{center}
-{\small\textit{Out-of-sample, January 2014 -- December 2025. Zero risk-free rate.}}
+{\footnotesize\textit{Zero risk-free rate. Substantial decarbonisation at a
+modest observed return cost; the Net-Zero glide path is slightly cheaper
+than the static cap because the benchmark self-decarbonised over the
+period.}}
 \end{center}
 
-These results indicate that substantial decarbonisation was achievable in
-our European sample at a modest observed cost in return terms. The Net-Zero
-glide path was even slightly cheaper than the static 50\% cap, because the
-benchmark itself decarbonised significantly over the period.
-
 \subsection{Why the Strategy Works}
-The carbon footprint of the benchmark is highly concentrated. In 2013, just
-ten firms --- including Holcim, Rio Tinto, RWE and Enel --- accounted for
-44\% of the benchmark's weighted-average carbon intensity. That concentration
-means a portfolio manager does not need to rebuild the entire index to
-decarbonise it: selective underweighting of a small group of high-intensity
-names can already deliver large carbon savings.
-
-A second factor in our sample is that the European benchmark's own carbon
-footprint fell by 58\% between 2013 and 2024, even without any portfolio
-intervention. That made a progressive Net-Zero constraint particularly
-efficient over this period.
+\begin{itemize}[leftmargin=*, itemsep=0pt, topsep=2pt]
+    \item \textbf{Carbon is concentrated.} 10 firms (Holcim, RWE, Rio Tinto,
+    Enel, \dots) account for 44\% of the benchmark's WACI in 2013 ---
+    selective underweighting captures most of the reduction.
+    \item \textbf{The benchmark self-decarbonised.} The European
+    value-weighted CF fell by 58\% between 2013 and 2024, which made the
+    Net-Zero glide path particularly efficient.
+\end{itemize}
 
 \subsection{Risks and Trade-offs}
-We do not present this as a universal result. Three caveats matter:
-\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=3pt]
-    \item \textbf{Sample dependence.} These findings reflect European equities
-    over 2014--2025 and may not carry over to other markets or periods.
-    \item \textbf{Incomplete emissions coverage.} The analysis uses Scope 1
-    and Scope 2 emissions only; Scope 3 remains excluded.
-    \item \textbf{Implementation frictions.} Transaction costs, turnover and
-    real-world trading constraints would need to be assessed before
-    deployment.
+\begin{itemize}[leftmargin=*, itemsep=0pt, topsep=2pt]
+    \item \textbf{Sample dependence:} results reflect European equities over
+    2014--2025; carbon-premium effects may differ in other markets or windows.
+    \item \textbf{Scope 3 excluded:} the analysis uses Scope 1 + Scope 2
+    emissions only.
+    \item \textbf{Implementation frictions:} transaction costs, turnover and
+    trading constraints to be assessed before deployment.
 \end{itemize}
 
 \subsection{Recommendation}
-For an investor seeking immediate and measurable decarbonisation, the
-\textbf{50\% carbon-cap strategy} provides a clear, transparent solution with
-limited deviation from benchmark performance.
+For immediate, measurable decarbonisation, the \textbf{50\% Carbon Cap}
+delivers a clear, transparent solution with limited tracking deviation. For
+long-term regulatory alignment and the deepest carbon reduction, the
+\textbf{Net-Zero Glide Path} is the stronger choice: it ends the horizon
+with $-$72\% carbon at a smaller observed return cost than the static cap.
+Both approaches are transparent, rules-based, and suitable for investors
+seeking lower financed emissions while preserving a benchmark-like European
+equity profile.
 
-For an investor seeking long-term regulatory alignment and a smoother
-transition path, the \textbf{Net-Zero glide path} is the stronger choice. In
-our sample, it delivered the deepest carbon reduction with a slightly smaller
-observed return cost than the static cap.
-
-Both approaches are rules-based, transparent, and offer a credible
-implementation framework for a client objective centred on lowering financed
-emissions while maintaining a recognisably benchmark-like European equity
-allocation.
-
-\vspace{0.3cm}
-\rule{\linewidth}{1pt}
+\vfill
+\rule{\linewidth}{0.5pt}
 \begin{center}
-{\small Arthur Pillet \quad Nathan Heimendinger Dreyfus \quad Marc Muller \quad Evan Dejean}\\
-{\small HEC Lausanne --- Sustainability Aware Asset Management --- May 2026}
+{\footnotesize \textbf{Group AU} --- HEC Lausanne --- Sustainability-Aware
+Asset Management --- May 2026 \quad \textbar \quad Arthur Pillet \quad
+Nathan Heimendinger Dreyfus \quad Marc Muller \quad Evan Dejean}
 \end{center}
+
 \end{document}
